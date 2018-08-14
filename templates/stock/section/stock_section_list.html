@@ -1,0 +1,173 @@
+{% extends "stock/base_single.html"%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<div>
+    <p class="text-left">板块名称：{{stockSectionForm.sectionName}}
+    股票代码：{{stockSectionForm.stockId}}
+    股票名称：{{stockSectionForm.stockName}}
+    </p>
+    <p class="text-right"><button class="btn btn-primary" id="query" onclick="query()">查询</button>
+    <button class="btn btn-primary" id="add_stock" onclick="add_stock()">添加信息</button>
+    <button class="btn btn-primary" id="synToTysoft" onclick="synToTysoft()">同步至天软</button>
+    <button class="btn btn-primary" id="batch_import" onclick="batch_import()">批量导入</button></p>
+    <table class="table table-hover">
+        <tr>
+            <td>序号</td>
+            <td>板块名称</td>
+            <td>股票代码</td>
+            <td>股票名称</td>
+            <td>操作</td>
+        </tr>
+        {% for row in list %}
+        <tr id="{{row.stockId}}">
+            <td>{{ forloop.counter }}</td>
+            <td><a href="/stock/section_market_info?sectionname={{row.sectionName}}">{{ row.sectionName }}</a></td>
+            <td><a href="/stock/stock_info?stockid={{ row.stockId }}" target="_Blank">{{ row.stockId }}</a></td>
+            <td>{{ row.stockName }}</td>
+            <td>
+            <a name="delete" href="javascript:" onclick="del_stock(this,'{{row.id}}','{{row.stockName}}')"><span class="glyphicon glyphicon-trash" style="margin-left:20px"></span></a>
+            </td>
+        </tr>
+        {% endfor%}
+    </table>
+
+    {% include "paginator.html "%}
+    
+    {% if errorMsg != '' %}
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+    {% endif %}
+</div>
+<form type="submit" action="{% url 'stock:stockSectionList'%}" id="submitForm">
+<input type="hidden" name="sectionName" id="submitSectionName">
+<input type="hidden" name="stockId"  id="submitStockId">
+<input type="hidden" name="stockName"  id="submitStockName">
+</form>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+
+    function query(){
+//url = "?page=1&sectionName=" + $("#id_sectionName").val() + "&stockId=" +  $("#id_stockId").val() + "&stockName=" +  $("#id_stockName").val()
+//location.replace(url)
+
+var form = $("#submitForm");
+$("#submitSectionName").val($("#id_sectionName").val());
+$("#submitStockId").val($("#id_stockId").val());
+$("#submitStockName").val($("#id_stockName").val());
+form.submit();
+}
+
+
+    function del_stock(the,id,name){
+        var name = $(the).parents("tr").children("td").eq(1).text()
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"删除股票",
+            content:'<div class="text-center" style="margin-top:20px"><p>是否确定删除{' + name +'}</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                $.ajax({
+                    url:'{% url "stock:deleteStock"%}',
+                    type:'POST',
+                    data:{"id":id},
+                    success:function(e){
+                        if(e=='1'){
+                            parent.location.reload();
+                            layer.msg("删除成功");
+                        }else{
+                            layer.msg("删除失败");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function add_stock(){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["500px","400px"],
+            title:"add stock",
+            content:'<div class="text-center" style="margin-top:20px"><p>请选择板块</p><p><select id="sectionName">{{sectionListHtml|safe}}</select></p></div>' +
+            '<div class="text-center" style="margin-top:20px"><p>请输入股票代码</p><p>{{stockSectionForm.stockId}}</p></div>' +
+            '<div class="text-center" style="margin-top:20px"><p>请输入股票名称</p><p>{{stockSectionForm.stockName}}</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                stockId = $('#sectionName').val();
+                stockId = $('#id_stockId').val();
+                stockName = $('#id_stockName').val();
+                $.ajax({
+                    url:'{% url "stock:addStock"%}',
+                    type:'POST',
+                    data:{"sectionName":sectionName,"stockId":stockId,"stockName":stockName},
+                    success:function(e){
+                        if(e=='1'){
+                            parent.location.reload();
+                            layer.msg("添加成功");
+                        }else{
+                            layer.msg("添加失败");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+    
+    function batch_import(){
+        layer.open({
+          type: 2,
+          title: '批量导入',
+          shadeClose: true,
+          shade: 0.8,
+          area:["500px","400px"],
+          content: '{% url "stock:batchImport"%}'
+        }); 
+    }
+
+
+    function synToTysoft(){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"同步至天软",
+            content:'<div class="text-center" style="margin-top:20px"><p>是否要将信息同步至天软？</p><p>温馨提示：尽量不要在交易时间进行本操作。</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                $.ajax({
+                    url:'{% url "stock:synToTysoft"%}',
+                    type:'POST',
+                    data:{},
+                    layerIndex:-1,
+                    beforeSend: function () { //插件加载前
+                        this.layerIndex = layer.load(0, { shade: [0.01, '#fff'] });
+                    },
+                    success:function(result){
+                        layer.close(this.layerIndex);
+                        layer.close(index)
+                        layer.msg(result);
+                    }
+            })},
+            btn2:function(index,layero){
+                layer.close(this.layerIndex);
+                layer.close(index)
+            }
+        });
+    }
+    
+
+</script>
+{% endblock %}

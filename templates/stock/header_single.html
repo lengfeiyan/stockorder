@@ -1,0 +1,30 @@
+{% load staticfiles %}
+
+<div class="container">
+    <nav class="navbar navbar-inverse" role="navigation">
+        <div class="navbar-header">
+         <!--
+            <a class="navbar-brand" href="http://127.0.0.1:8000/stock/section">
+           
+                <img src="{% static 'images/logo.png' %}" width="100px">
+            </a>-->
+        </div>
+        <div>
+            <ul class="nav navbar-nav" role="tablist">
+                
+                <li><a href="{% url 'stock:newsList'%}">资讯</a></li>
+                <li><a href="{% url 'stock:newsStat'%}">资讯统计</a></li>
+                <li><a href="{% url 'stock:sectionList'%}">板块管理</a></li>
+                <li><a href="{% url 'stock:stockSectionList'%}">股票板块管理</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" style="margin-right:10px">
+            </ul>
+        </div>
+    </nav>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js'%}"></script>
+<script type="text/javascript">
+       $('.dropdown-toggle').dropdown();
+</script>

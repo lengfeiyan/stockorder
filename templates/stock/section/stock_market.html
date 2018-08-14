@@ -1,0 +1,185 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style type="text/css">
+    a {
+    color: #333;
+    background: transparent;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+    -webkit-transition: color .2s ease;
+    transition: color .2s ease;
+}
+
+li{
+    list-style: none;
+}
+
+.section-sort-stock {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 128px;
+    flex: 0 0 128px;
+
+    display: flex;
+}
+
+.section-sort-stock a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: flex-start;
+    -ms-flex-align: flex-start;
+    align-items: flex-start;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 128px;
+    height: 110px;
+    color: #fff;
+}
+
+.section-sort-desc-stock ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+.section-sort-desc-stock {
+    width: 100%;
+    max-width: 100%;
+}
+
+.section-sort-bkj-rate-stock {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px
+}
+</style>
+
+    <p class="text-right">
+    <button class="btn btn-primary" >复制股票代码</button>
+    </p>
+
+    <section class="section-sort-desc-stock">
+        <ul>
+            <li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+                <a href="#" target="_blank" class="text-left">
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">
+                    <span>必创科技 </span><span>+10.00% 09:35</span>
+                    </p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+                <a href="#" target="_blank" class="text-left">
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">
+                    <span>必创科技 </span><span>+10.00% 09:35</span>
+                    </p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+            </li>
+            <li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+                <a href="#" target="_blank" >
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">必创科技 +10.00% 09:35</p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+                <a href="#" target="_blank" class="text-left">
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">
+                    <span>必创科技 </span><span>+10.00% 09:35</span>
+                    </p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+            </li>
+            <li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+                <a href="#" target="_blank" >
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">必创科技 +10.00% 09:35</p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+                <a href="#" target="_blank" class="text-left">
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">
+                    <span>必创科技 </span><span>+10.00% 09:35</span>
+                    </p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+            </li>
+            <li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+                <a href="#" target="_blank" >
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">必创科技 +10.00% 09:35</p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+                <a href="#" target="_blank" class="text-left">
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" id="stock1rate">
+                    <span>必创科技 </span><span>+10.00% 09:35</span>
+                    </p>
+                    <p class="section-sort-bkj-rate-stock">总龙头 5版+</p>
+                </a>
+            </li>
+        </ul>
+
+    </section>
+    {% if errorMsg != '' %}
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+    {% endif %}
+    <!--
+    {% include "paginator.html "%} -->
+
+<script type="text/javascript" src="{% static "js/clipboard.min.js"%}"></script>
+<script type="text/javascript">
+/*$(document).ready(function(){
+        $("#myTable").DataTable({
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
+        });
+        $('#checkall').click(function(){
+            $('[name=checkitem]:checkbox').prop('checked',this.checked);
+        });
+    });
+$.extend( $.fn.dataTableExt.oStdClasses, {
+    "sWrapper": "dataTables_wrapper form-inline"
+} );*/
+var clipboard = new ClipboardJS('.btn', {
+        text: function() {
+            stockIdStr = ''
+            $('[name=checkitem]:checkbox:checked').each(function(){
+                if(stockIdStr == ''){
+                    stockIdStr = $(this).val();
+                }else{
+                    stockIdStr = stockIdStr + ',' + $(this).val()
+                }
+
+            });
+            return stockIdStr;
+        }
+    });
+
+    clipboard.on('success', function(e) {
+
+    });
+
+    clipboard.on('error', function(e) {
+        alert(e);
+    });
+</script>
+{% endblock %}

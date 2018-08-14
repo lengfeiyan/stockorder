@@ -1,0 +1,136 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<div>
+    <div class="row">
+    <h3>{{stockData.stockId}}({{stockData.stockName}})</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-2 text-left">
+        <span style="color:red"><h2>{{ stockData.close }}</h2></span>
+        <span style="color:red;margin-top:2px">{{ stockData.increaseRateStr }}</span>
+        </div>
+        <div class="col-md-10 text-left">
+            <table class="table table-hover">
+            <tr>
+            <td>昨收</td><td>{{ stockData.closeLastDay }}</td>
+            <td>最高</td><td>{{ stockData.high }}</td>
+            <td>振幅</td><td>{{ amplitude }}</td>
+            <td>成交量</td><td>{{ stockData.vol }}</td>
+            </tr>
+            <tr>
+            <td>今开</td><td>{{ stockData.openPrice }}</td>
+            <td>最低</td><td>{{ stockData.low }}</td>
+            <td>换手率</td><td>{{ stockData.turnoverRate }}</td>
+            <td>成交额</td><td>{{ stockData.amount }}</td>
+            </tr>
+            </table>
+        </div>
+    </div>
+    <div>
+        
+    </div>
+</div>
+<div>
+    <div class="row">
+        <div class="col-md-9 text-left">
+            <iframe width="100%" scrolling="no" frameborder="0" height="475px" 
+            id="iFrame1"  name="iFrame1" 
+            src="https://wallstreetcn.com/markets/widget/ashares/{{stockId2}}">
+            
+            </iframe> 
+        </div>
+        <div class="col-md-3 text-center">
+        
+        <div class="row" style="height:375px;overflow-y:auto">
+        <ul class="nav nav-tabs nav-stacked" id="comments">
+         {% for comment in commentList %}
+            <li id="comment{{forloop.counter}}">
+                <p class="text-left">{{ forloop.counter}} . {{comment.comment}}</p>
+                <p class="text-right" ><span class="glyphicon glyphicon-thumbs-up" id="commentlike{{comment.id}}" onclick="like({{comment.id}},1)">{{comment.like}}</span>
+                <span class="glyphicon glyphicon-thumbs-down" style="margin-left:5px" id="commentdislike{{comment.id}}" onclick="like({{comment.id}},-1)">{{comment.dislike}}</span></p>
+            </li>
+         {% endfor %}
+        </ul>    
+        </div>
+        
+        <div class="row" style="height:100px">
+        <textarea style="width:100%"  rows="4" id="commentnew"></textarea>
+        <br>
+        <button class="btn btn-primary" id="submit" onclick="submit()">提交</button>
+        </div>
+        </div>
+    </div>
+    {% if errorMsg != '' %}
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+    {% endif %}
+    <!--
+    {% include "paginator.html "%} -->
+</div>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+    var commentLen = {{commentList|length}} + 1;
+    function submit(){
+        var comment = $('#commentnew').val()
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"提交评论",
+            content:'<div class="text-center" style="margin-top:20px"><p>是否确定提交</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                $.ajax({
+                    url:'{% url "stock:addComment"%}',
+                    type:'POST',
+                    data:{"comment":comment,"stockId":'{{stockData.0}}'},
+                    success:function(result){
+                        if(result!='-1'){
+                            var commentlist = document.getElementById('comments');
+                            commentlist.innerHTML += '<li id="comment' + commentLen + '"><p class="text-left">' + commentLen + ' . ' + comment + '</p>' +
+                '<p class="text-right" ><span class="glyphicon glyphicon-thumbs-up" id="commentlike' + result + '" onclick="like(' + result +',1)">0</span>' + 
+                '<span class="glyphicon glyphicon-thumbs-down" style="margin-left:5px" id="commentdislike' + result + '" onclick="like(' + result +',-1)">0</span></p></li>'
+                            commentLen += 1;
+                            layer.msg("提交成功");
+                            layer.closeAll();
+                        }else{
+                            layer.msg("提交失败");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function like(id,type){
+        $.ajax({
+                url:'{% url "stock:likeComment"%}',
+                type:'POST',
+                data:{"type":type,"id":id},
+                success:function(result){
+                    if(result!='-1'){
+                        eleid = ''
+                        if(type == 1){
+                            eleid = 'commentlike' + id;
+                        }else{
+                            eleid = 'commentdislike' + id;
+                        }
+                        document.getElementById(eleid).innerHTML = result;
+                        //layer.msg("提交成功");
+                    }else{
+                        //layer.msg("提交失败");
+                    }
+                }
+            });
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+   <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+</head>
+<body>
+<form enctype="multipart/form-data" method="post" action="{% url 'stock:batchImport'%}">
+    {% csrf_token %}
+    <div class="form-group  text-center">
+        <label for="exampleInputFile">板块名称</label>
+        <select name="sectionName">
+        {{sectionListHtml|safe}}
+        </select>
+        <label for="exampleInputFile">选择文件</label>
+        <input type="file"  name="uploadFile">
+    </div>
+  
+    <div class="col-lg-offset-3 text-center">
+     <button class="btn btn-primary" type="submit">批量导入</button>
+    </div>
+ 
+</form>
+{{ result }}
+</body>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>

@@ -1,0 +1,59 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+
+<div>
+    <table class="table table-hover" id="table">
+        <thead>
+            <td>板块名称</td>
+            <td>板块涨幅</td>
+            <td>板块涨速</td>
+            <td>领涨股</td>
+            <td>涨家数</td>
+            <td>跌家数</td>
+            <td>换手</td>
+            <td>金额</td>
+            <td>总手</td>
+            <td>资讯</td>
+        </thead>
+        {% for section in sectionList %}
+            <tr>
+                <td><a href="/stock/section_market_info?sectionid={{ section.sectionId }}" target="_Blank">{{ section.sectionName }}</a></td>
+                <td style="color:{%if section.sectionIncreaseRate > 0%}#e52222{%endif%}{%if section.sectionIncreaseRate < 0%}#18a66b{%endif%}">{{ section.sectionIncreaseRateStr }}</td>
+                <td></td>
+                <td>{{ section.mostIncreaseStockName }}{{ section.mostIncreaseIncreateRateStr }}</td>
+                <td>{{ section.increaseCount }}</td>
+                <td>{{ section.decreaseCount }}</td>
+                <td>{{ section.change }}</td>
+                <td>{{ section.amount }}</td>
+                <td>{{ section.num }}</td>
+                <td>
+                    <p sytle="color:red" title="{% for news in section.newsList %}
+                    {{news.datetime}} : {{news.title}}.
+                    {% endfor %}">{{section.newsCount}}</p>
+                </td>
+            </tr>
+        {% endfor%}
+    </table>
+    {% if errorMsg != '' %}
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+    {% endif %}
+    <!--
+    {% include "paginator.html "%} -->
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+        $("#table").DataTable({
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "order": [[ 1, "desc" ]]
+        });
+    });
+$.extend( $.fn.dataTableExt.oStdClasses, {
+    "sWrapper": "dataTables_wrapper form-inline"
+} );
+</script>
+{% endblock %}

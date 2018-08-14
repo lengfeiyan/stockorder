@@ -1,0 +1,147 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+   <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <!--<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sortedtable.css' %}">
+    
+    <link rel="stylesheet" href="{% static 'css/stock.css' %}">-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/loader.css' %}">
+</head>
+<style type="text/css">
+
+  .iframeclass{
+    margin-bottom:10px;
+    margin-top:10px;
+    margin-right:10px;
+    margin-left:10px;
+    border: 0;
+  }
+</style>
+<body  style="width:1900px;">
+<div style="width:1850px">
+
+    {% include "stock/base/header.html"%}
+    <div class="col-md-2">
+      <iframe src="{% url 'stock:left'%}" width="100%" height="900px" class="iframeclass" marginwidth="0" marginheight="0" frameborder="0" allowtransparency="true" scrolling="no" name="left" id="left"></iframe>
+    </div>
+    <div class="col-md-8" style="width:1200px">      
+      <div class="container" style="padding-top:0;margin-left:10px">
+        <iframe src="{% url 'stock:marketInfo'%}" width="100%" height="60px" class="iframeclass" marginwidth="0" marginheight="0" frameborder="0" allowtransparency="true" style="margin-bottom:0"></iframe>
+      </div>
+      <p class="text-right" id="buttonArea">
+        <a name="hide" href="javascript:" onclick="toggleSection()" title="隐藏" style="margin-right:5px">
+            <span class="glyphicon glyphicon-chevron-down"></span>
+        </a>
+        <a name="hide" href="javascript:" onclick="openSectionInNewWindow()" title="小窗打开" style="margin-right:5px">
+            <span class="glyphicon glyphicon-resize-full"></span>
+        </a>
+        <a name="hide" href="javascript:" onclick="closeSection()" title="关闭" style="margin-right:5px">
+            <span class="glyphicon glyphicon-remove"></span>
+        </a>
+      </p>
+      <div class="container" style="padding-left: 0;margin-left:10px" id="section">
+        <iframe src="{% url 'stock:sectionInfoHomepage'%}" width="100%"  height="300px"  class="iframeclass" allowtransparency="true"  marginwidth="0" marginheight="0" frameborder="0" style="padding-left: 0;margin-bottom:0" ></iframe>
+      </div>
+      <div class="container" style="padding-left: 0;height:100%;margin-left:10px">
+        <iframe src="{% url 'stock:stockListAjax'%}?type=auction" width="100%" height="100%" class="iframeclass" id="main" name="myiframe" allowtransparency="true"></iframe>
+      </div>
+
+          {% block content %}
+          {% endblock%}
+    </div>
+     <div class="col-md-2" style="padding-left: 0;height:1200px;margin-left:10px">
+     
+     <iframe src="{% url 'stock:newsList'%}" width="100%" class="iframeclass" allowtransparency="true" id="news"></iframe>
+     
+     </div>
+      {% include "footer.html"%}
+</div>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+function reinitIframe(iframeId){
+var iframe = document.getElementById(iframeId);
+try{
+  var bHeight = iframe.contentWindow.document.body.scrollHeight;
+  var dHeight = iframe.contentWindow.document.documentElement.scrollHeight;
+  var height = Math.max(bHeight, dHeight);
+  height = Math.max(height, 300);
+  iframe.height = height;
+}catch (ex){}
+}
+function reinitAllIframe(){
+  reinitIframe("main");
+  reinitIframe("news");
+}
+window.setInterval("reinitAllIframe()", 2000);
+
+
+function updateLeftPage(data){
+  $("#left")[0].contentWindow.updateData(data);
+}
+
+function changeiframe(url){
+  var iframe = document.getElementById("main");
+  main.src=url;
+}
+
+function openStockWatchListPage(){
+  layer.open({
+      type: 2,
+      title: '重点监控个股设置',
+      shadeClose: true,
+      shade: 0.8,
+      area:["800px","600px"],
+      content: '{% url "stock:stockWatchList"%}'
+    }); 
+}
+
+function toggleSection(){
+    $('#section').toggle();
+}
+
+function openSectionInNewWindow(){
+    $('#section').hide(); 
+    $('#buttonArea').toggle();
+    layer.open({
+      type: 2,
+      title: '  ',
+      maxmin: true,
+      shadeClose: true,
+      shade: false,
+      area:["1200px","330px"],
+      content: '{% url "stock:sectionInfoHomepage"%}',
+      end:function(){
+        $('#section').toggle(); 
+        $('#buttonArea').toggle();
+      }
+    });
+}
+
+function closeSection(){
+  $('#buttonArea').hide();
+  $('#section').remove();
+}
+
+function showMarketKLine(marketid,y,x){
+  index = layer.open({
+    type: 2,
+    title: '',
+    shadeClose: true,
+    closeBtn: 1,
+    shade: 0,
+    area:["878px","475px"],
+    offset:[y,x],
+    content: 'https://wallstreetcn.com/markets/widget/ashares/' + marketid
+  });
+  return index;
+}
+function closeMarketKLine(index){
+  layer.close(index);
+}
+</script>
+</body>
+</html>

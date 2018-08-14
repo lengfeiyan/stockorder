@@ -1,0 +1,204 @@
+{% load staticfiles %}
+<style>
+
+.typeahead,
+.tt-query,
+.tt-hint {
+  width: 156px;
+  height: 30px;
+  padding: 8px 12px;
+  line-height: 30px;
+  border: 2px solid #ccc;
+  -webkit-border-radius: 8px;
+     -moz-border-radius: 8px;
+          border-radius: 8px;
+  outline: none;
+}
+
+.typeahead {
+  background-color: #fff;
+}
+
+.typeahead:focus {
+  border: 2px solid #0097cf;
+}
+
+.tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+  color: #999
+}
+
+.tt-menu {
+  width: 310px;
+  margin: 12px 0;
+  padding: 8px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 8px;
+     -moz-border-radius: 8px;
+          border-radius: 8px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+          box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.tt-suggestion:hover {
+  cursor: pointer;
+  color: #fff;
+  background-color: #0097cf;
+}
+
+.tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #0097cf;
+
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+.gist {
+  font-size: 14px;
+}
+  </style>
+<script type="text/javascript" src="{% static 'js/jquery.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/typeahead/typeahead.bundle.min.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/handlebars.js'%}"></script>
+<div class="container" style="margin-bottom:0">
+    <nav class="navbar navbar-inverse" role="navigation" style="margin-bottom:0">
+        <div class="navbar-header">
+
+            <a class="navbar-brand" href="{% url 'stock:homepage'%}">
+                <img src="{% static 'images/logo.png' %}" width="60px">
+            </a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav" role="tablist">
+                <li class="active"><a href="{% url 'stock:stockListAjax'%}?type=all" target="myiframe">首页</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=auction" target="myiframe">竞价排名</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=amountRate" target="myiframe">量比排行</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=occupationRate" target="myiframe">占比排行</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=turnoverRate" target="myiframe">换手排行</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=ndaysLimitUp" target="myiframe">涨停活跃</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=firstLimitUp" target="myiframe">首板排行</a></li>
+                <li id="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">形态<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=increaseFastWithAmount" target="myiframe">带量急拉</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=longTopShadow" target="myiframe">上长影</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=longBottomShadow" target="myiframe">下长影</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=maClose" target="myiframe">均线粘合</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=longHedging" target="myiframe">多头</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=short" target="myiframe">空头</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=through3lines" target="myiframe">穿3线</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=breakThrough3lines" target="myiframe">破后穿3线</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=reopenAbnormal" target="myiframe">复牌异动</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=devourLine" target="myiframe">吞噬线</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=breakthroughLine" target="myiframe">贯穿线</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=hasLimitUp" target="myiframe">区间有板</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=strongWash" target="myiframe">昨日强洗</a></li>
+                        <li><a href="{% url 'stock:stockListAjax'%}?type=IslandReversal" target="myiframe">岛转</a></li>
+                    </ul>
+                </li>
+                <!--<li><a href="{% url 'stock:stockListAjax'%}?type=" target="myiframe">分时异动*</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=" target="myiframe">涨速排行*</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=" target="myiframe">资金流入*</a></li>
+                <li><a href="{% url 'stock:stockListAjax'%}?type=" target="myiframe">大单流入*</a></li>-->
+                <li><a href="{% url 'stock:newsStat'%}" target="myiframe">资讯</a></li>
+                <li id="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">基础数据管理<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'stock:sectionList'%}" target="_blank">板块管理</a></li>
+                        <li><a href="{% url 'stock:stockSectionList'%}" target="_blank">股票板块管理</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" style="margin-right:10px">
+                <div class="form-group">
+                <input id="queryStock" class="typeahead form-control" type="text" autocomplete="off" data-provide="typeahead" placeholder="请输入关键词" style="margin-top:8px">
+                <button class="btn btn-primary" onclick="showStockInfoPage()">查询</button>
+                </div>
+                <!--<div class="input-group">
+                    <input id="queryStock" class="typeahead form-control" type="text" autocomplete="off" data-provide="typeahead" placeholder="请输入关键词" style="margin-top:8px">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" onclick="showStockInfoPage()">查询</button>
+                    </span>
+                </div>-->
+            </ul>
+        </div>
+    </nav>
+</div>
+
+<script type="text/javascript">
+$('.dropdown-toggle').dropdown();
+
+$(".navbar-nav").find("li").each(function () {
+    $(this).click(function(){
+        $("li.active").removeClass("active");
+        $(this).addClass("active");
+    });
+});
+
+
+//远程数据源
+var stocks = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    // 在文本框输入字符时才发起请求
+    //remote: '/stock/load_stock_info?q=%QUERY',
+    remote: {
+                url: '/stock/load_stock_info?q=%QUERY',  
+                wildcard: '%QUERY'  
+            }
+});
+
+stocks.initialize();
+
+$('#queryStock').typeahead({
+    highlight:true
+}, {
+    name: 'stocks',
+    displayKey: 'name',
+    source: stocks.ttAdapter(),
+    limit:10,
+    templates: {
+        empty: [
+            '<div class="empty-message">',
+            '没有找到相关数据',
+            '</div>'
+        ].join('\n'),
+        suggestion: Handlebars.compile('<p><i>\{\{id\}\}</i> - \{\{name\}\}</p>')
+        //suggestion:'\{\{id\}\} - \{\{name\}\}'
+    }
+    //templates: '\{\{id\}\} - \{\{name\}\}'
+});
+
+function showStockInfoPage(){
+    var queryStock = $('#queryStock').val();
+    $.ajax({
+        url: '{% url "stock:getStockId"%}',
+        type: 'post',
+        data: {'queryStr': queryStock},
+        success: function (result) {
+            if(result != ''){
+                var url = "{% url 'stock:stockInfoAjax'%}?stockName=" + queryStock;
+	            changeiframe(url);
+            }
+        },
+    });
+}
+</script>

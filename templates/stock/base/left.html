@@ -1,0 +1,261 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style type="text/css">
+	#tooltip {
+            position: absolute;
+            border: 1px solid #333;
+            background: #f7f5d1;
+            padding: 1px;
+            color: #333;
+            display: none;
+        }
+     #tooltiptd {
+
+     }
+</style>
+<div style="width:300px">
+	<div>
+		<h3>赚钱效应</h3>
+		<p>打板成功率：<span id="buyLimitUpSuccessRate"></span></p>
+		<p>打板盈利率：<span id="buyLimitUpReturnRate"></span></p>
+		<p>
+			涨停<span id="count1"></span>&nbsp;
+			自然<span id="count2"></span>&nbsp;
+			一字<span id="count3"></span>&nbsp;
+			T板<span id="count4"></span>
+		</p>
+		<p>
+			涨停<span id="count5"></span>&nbsp;
+			首板<span id="count6"></span>&nbsp;
+			二板<span id="count7"></span>&nbsp;
+			三板<span id="count8"></span>
+		</p>
+		<p>
+			烂板<span id="count9"></span>&nbsp;
+			首烂<span id="count10"></span>&nbsp;
+			二烂<span id="count11"></span>&nbsp;
+			三烂<span id="count12"></span>
+		</p>
+		<p>
+			跌停<span id="count13"></span>&nbsp;
+			一跌<span id="count14"></span>&nbsp;
+			二跌<span id="count15"></span>&nbsp;
+			三跌<span id="count16"></span>
+		</p>
+	</div>
+	<div class="alert alert-danger">
+		<p>
+			昨日带量急拉个股：<span id="riseWithAmountYesterday"></span>
+		</p>
+		<p style="color:red">
+			今日带量急拉个股：<span id="riseWithAmountToday"></span>
+		</p>
+		<p style="color:green">
+			昨日砸盘<span id="boomYesterday"></span>&nbsp;
+			今日砸盘<span id="boomToday"></span>
+		</p>
+	</div>
+	<div>
+		<span class="label label-danger" style="font-size: 110%">板块资讯密集排行</span>
+		<table class="table table-hover" style="width:80%;margin-bottom:5px;margin-top: 10px">
+			<tbody id="sectionNews"></tbody>
+		</table>
+		<span class="label label-danger" style="font-size: 110%">个股资讯密集排行</span>
+		<table class="table" style="width:80%;margin-top: 10px">
+			<tbody id="stockNews"></tbody>
+		</table>
+	</div>
+
+	<div>
+		<span class="label label-danger" style="font-size: 110%">重点监控个股列表</span>
+		<button class="btn btn-primary btn-xs" onclick="add_watch_list()">添加监控个股</button>
+		<table class="table table-hover" style="margin-top: 8px">
+        <thead>
+            <td>股票名称</td>
+            <td>当前价</td>
+            <td>涨幅</td>
+		</thead>
+		<tbody id="watchList"></tbody>
+    </table>
+	</div>
+</div>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+
+<script type="text/javascript">
+	function updateData2(){
+		$.ajax({
+			url:"{% url 'stock:marketInfo'%}",
+			type:"POST",
+			data:{},
+			success:function(result){
+
+			},
+		});
+	}
+
+	function updateData(data){
+		for(i=0;i<16;i++){
+			$('#count1').text(data.limitupStcokTotal);
+			$('#count2').text(data.limitupNormalStcokTotal);
+			$('#count3').text(data.limitupOneTypeStcokTotal);
+			$('#count4').text(data.limitupTTypeStcokTotal);
+			$('#count5').text(data.limitupStcokTotal);
+			$('#count6').text(data.limitupFirstStcokTotal);
+			$('#count7').text(data.limitupSencondStcokTotal);
+			$('#count8').text(data.limitupThirdStcokTotal);
+			$('#count9').text(data.badLimitupStcokTotal);
+			$('#count10').text(data.badLimitupFirstStcokTotal);
+			$('#count11').text(data.badLimitupSencondStcokTotal);
+			$('#count12').text(data.badLimitupThirdStcokTotal);
+			$('#count13').text(data.limitdownStcokTotal);
+			$('#count14').text(data.limitdownFirstStcokTotal);
+			$('#count15').text(data.limitdownSencondStcokTotal);
+			$('#count16').text(data.limitdownThirdStcokTotal);
+		}
+		
+	}
+
+	function updateAmountData(){
+		$.ajax({
+			url:"{% url 'stock:left'%}",
+			type:"POST",
+			data:{},
+			success:function(result){
+				if(result[0] == '0'){
+					$('#riseWithAmountToday').text(result[1]);
+					$('#riseWithAmountYesterday').text(result[2]);
+					
+					sectionNewsList = result[3];
+					var len = sectionNewsList.length <= 3 ? sectionNewsList.length : 3;
+					htmlStr = ''
+					for(i=0;i<len;i++){
+						htmlStr += '<tr>';
+						htmlStr += '<td style="width:30%">';
+						htmlStr += sectionNewsList[i][0]
+						htmlStr += '</td>';
+						htmlStr += '<td>';
+						for(j=0;j<sectionNewsList[i][1].length;j++){
+							color = 'grey';
+							if(sectionNewsList[i][1][j].isbull.indexOf('利好') != -1){
+								color = 'red';
+							}else if(sectionNewsList[i][1][j].isbull.indexOf('利空') != -1){
+								color = 'green';
+							}
+							content = sectionNewsList[i][1][j].datetime + ':' + sectionNewsList[i][1][j].title + ' '+ sectionNewsList[i][1][j].isbull  + '<br>' + sectionNewsList[i][1][j].content;
+							htmlStr += '<span class="glyphicon glyphicon-asterisk" style="color:' + color +'" title="';
+							htmlStr += content + '""></span>';
+						}
+						htmlStr += '</td>';
+						htmlStr += '</tr>';
+					}
+					var rows = $('#sectionNews tr');
+					for(i=0;i<rows.length;i++){
+						rows[i].remove();
+					}
+					$('#sectionNews').append(htmlStr);
+
+					stockNewsList = result[4];
+					var len = stockNewsList.length <= 3 ? stockNewsList.length : 3;
+					htmlStr = ''
+					for(i=0;i<len;i++){
+						htmlStr += '<tr>';
+						htmlStr += '<td style="width:30%">';
+						htmlStr += stockNewsList[i][0]
+						htmlStr += '</td>';
+						htmlStr += '<td>';
+						for(j=0;j<stockNewsList[i][1].length;j++){
+							color = 'grey';
+							if(stockNewsList[i][1][j].isbull.indexOf('利好') != -1){
+								color = 'red';
+							}else if(stockNewsList[i][1][j].isbull.indexOf('利空') != -1){
+								color = 'green';
+							}
+							content = stockNewsList[i][1][j].datetime + ':' + stockNewsList[i][1][j].title + ' '+ stockNewsList[i][1][j].isbull  + '<br>' + stockNewsList[i][1][j].content;
+							htmlStr += '<span class="glyphicon glyphicon-asterisk" style="color:' + color +'" title="';
+							htmlStr += content + '""></span>';
+						}
+						htmlStr += '</td>';
+						htmlStr += '</tr>';
+					}
+					var rows = $('#stockNews tr');
+					for(i=0;i<rows.length;i++){
+						rows[i].remove();
+					}
+					$('#stockNews').append(htmlStr);
+
+					stockList = result[5];
+					htmlStr = ''
+					for(i=0;i<stockList.length;i++){
+						htmlStr += '<tr>';
+						htmlStr += '<td title="' + stockList[i][0] +'">';
+						htmlStr += stockList[i][1]
+						htmlStr += '</td>';
+						htmlStr += '<td>';
+						htmlStr += stockList[i][2]
+						htmlStr += '</td>';
+						color = "grey";
+						if(stockList[i][2] > stockList[i][3]){
+							color = "red";
+						}else if(stockList[i][2] < stockList[i][3]){
+							color = "green";
+						}
+						htmlStr += '<td style="color:' + color + '">';
+						htmlStr += stockList[i][4];
+						htmlStr += '</td>';
+						htmlStr += '</tr>';
+					}
+					var rows = $('#watchList tr');
+					for(i=0;i<rows.length;i++){
+						rows[i].remove();
+					}
+					$('#watchList').append(htmlStr);
+
+					bindEvent();
+				}else{
+                    layer.msg(result[1]);
+				}
+			},
+		});
+	}
+
+	$(document).ready(function(){
+        updateAmountData();
+        setInterval(updateAmountData,30000);
+    });
+function bindEvent(){
+    $(function () {
+        var x = 100;
+        var y = 20;
+        $("span.glyphicon").mouseover(function (e) {
+            this.myTitle = this.title;
+            this.title = "";
+            var tooltip = "<div id='tooltip'><ul>" + this.myTitle + "<\/ul><\/div>"; //创建 div 元素 文字提示
+            $("body").append(tooltip);  //把它追加到文档中
+            $("#tooltip").css({
+                "top": (e.pageY + y) + "px",
+                "left": (e.pageX - x) + "px"
+            }).show("fast");      //设置x坐标和y坐标，并且显示
+        }).mouseout(function () {
+            this.title = this.myTitle;
+            $("#tooltip").remove();   //移除
+        }).mousemove(function (e) {
+            $("#tooltip").css({
+                "top": (e.pageY + y) + "px",
+                "left": (e.pageX - x) + "px"
+            });
+        });
+    })
+}
+    function add_watch_list(){
+    	if(parent){
+			parent.window.openStockWatchListPage()
+		}
+    }
+
+</script>
+{% endblock %}

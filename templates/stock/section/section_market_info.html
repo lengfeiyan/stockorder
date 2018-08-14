@@ -1,0 +1,113 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style>
+
+#tooltip {
+    position: absolute;
+    border: 1px solid #333;
+    background: #f7f5d1;
+    padding: 1px;
+    color: #333;
+    display: none;
+}
+</style>
+<div>
+<h3>{{sectionInfo.sectionName}}</h3>
+<p>{{sectionInfo.sectionIncreaseRateStr}}</p>
+<div>
+<div>
+    <table class="table table-hover" id="myTable">
+        <thead>
+            <td>股票代码</td>
+            <td>股票名称</td>
+            <td>昨收</td>
+            <td>开盘价</td>
+            <td>最高价</td>
+            <td>最低价</td>
+            <td>当前价</td>
+            <td>涨幅</td>
+            <td>资讯</td>
+        </thead>
+        {% for stock in stockList %}
+            <tr>
+                <td><a href="/stock/stock_info?stockid={{stock.0}}" target="_Blank">{{ stock.stockId }}</a></td>
+                <td><a href="#" onclick="showKLine('{{stock.0}}')">{{ stock.stockName }}</a></td>
+                <td>{{ stock.closeLastDay }}</td>
+                <td>{{ stock.openPrice }}</td>
+                <td>{{ stock.high }}</td>
+                <td>{{ stock.low }}</td>
+                <td>{{ stock.close }}</td>
+                <td style="color:{%if stock.close > stock.closeLastDay%}red{%elif stock.close < stock.closeLastDay%}green{%endif%}">{{ stock.increaseRateStr }}</td>
+                <td>
+                    {% for news in stock.newsList %}
+                    <span class="glyphicon glyphicon-asterisk" style="color:{%if news.isbull == '利好' or news.isbull == '超级利好'%}red{% elif news.isbull == '利空' or news.isbull == '超级利空'%}green{%else%}grey{%endif%}" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor%}
+    </table>
+    <!--
+    {% include "paginator.html "%} -->
+</div>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+        $("#myTable").DataTable({
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "order": [[ 7, "desc" ]]
+        });
+    });
+$.extend( $.fn.dataTableExt.oStdClasses, {
+    "sWrapper": "dataTables_wrapper form-inline"
+} );
+
+$("span.glyphicon").mouseover(function (e) {
+    this.myTitle = this.title;
+    this.title = "";
+    var tooltip = "<div id='tooltip'>" + this.myTitle + "<\/div>"; //创建 div 元素 文字提示
+    $("body").append(tooltip);  //把它追加到文档中
+    $("#tooltip").css({
+        "top": (e.pageY + 5) + "px",
+        "left": (e.pageX + 5) + "px"
+    }).show("fast");      //设置x坐标和y坐标，并且显示
+}).mouseout(function () {
+    this.title = this.myTitle;
+    $("#tooltip").remove();   //移除
+}).mousemove(function (e) {
+    $("#tooltip").css({
+        "top": (e.pageY + 5) + "px",
+        "left": (e.pageX + 5) + "px"
+    });
+});
+
+var layerIndex = -1
+function showKLine(stockId){
+        var market = stockId.substr(0,2);
+        if(market == 'SH'){
+            market = 'SS';
+        }
+        stockId2 = stockId.substr(2) + '.' + market;
+        layerIndex = layer.open({
+          type: 2,
+          title: '',
+          shadeClose: true,
+          shade: 0.8,
+          area:["878px","475px"],
+          content: 'https://wallstreetcn.com/markets/widget/ashares/' + stockId2
+        }); 
+    }
+
+    function closeKLine(){
+        if(layerIndex != -1){
+            layer.close(layerIndex)
+            layerIndex = -1;
+        }
+        
+    }
+</script>
+{% endblock %}

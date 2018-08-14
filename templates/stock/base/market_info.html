@@ -1,0 +1,218 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+{% block content%}
+
+<style>
+	.marketName{
+		font-size:100%;
+	}
+</style>
+	<div class="col-md-3">
+		<div class="row">
+			<span class="marketName" title="000001.SS">上证指数&nbsp;</span><span id="index1"></span>&nbsp;<span id="index1Rate"></span>&nbsp;&nbsp;
+		</div>	
+		<div class="row">
+			<span id="incre1" class="up"></span>/<span id="decrea1" class="down"></span>&nbsp;
+			<span id="maxIncre1" class="up"></span>&nbsp;
+			<span id="maxDecrea1" class="down"></span>&nbsp;
+			<span id="strongIncre1" class="up"></span>/<span id="strongDerea1" class="down"></span>
+		</div>
+		<div class="row" style="color:grey">
+			<span id="incre1lastday"></span>/<span id="decrea1lastday"></span>&nbsp;
+			<span id="maxIncre1lastday"></span>&nbsp;
+			<span id="maxDecrea1lastday"></span>&nbsp;
+			<span id="strongIncre1lastday"></span>/<span id="strongDerea1lastday"></span>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="row">
+			<span class="marketName" title="399001.SZ">深证成指&nbsp;</span><span id="index2"></span>&nbsp;<span id="index2Rate"></span>&nbsp;&nbsp;</div>	
+		<div class="row">
+			<span id="incre2" class="up"></span>/<span id="decrea2" class="down"></span>&nbsp;
+			<span id="maxIncre2" class="up"></span>&nbsp;
+			<span id="maxDecrea2" class="down"></span>&nbsp;
+			<span id="strongIncre2" class="up"></span>/<span id="strongDerea2" class="down"></span>
+		</div>
+		<div class="row" style="color:grey">
+			<span id="incre2lastday"></span>/<span id="decrea2lastday"></span>&nbsp;
+			<span id="maxIncre2lastday"></span>&nbsp;
+			<span id="maxDecrea2lastday"></span>&nbsp;
+			<span id="strongIncre2lastday"></span>/<span id="strongDerea2lastday"></span>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="row">
+			<span class="marketName" title="399006.SZ">创业板指&nbsp;</span><span id="index3"></span>&nbsp;<span id="index3Rate"></span>&nbsp;&nbsp;</div>	
+		<div class="row">
+			<span id="incre3" class="up"></span>/<span id="decrea3" class="down"></span>&nbsp;
+			<span id="maxIncre3" class="up"></span>&nbsp;
+			<span id="maxDecrea3" class="down"></span>&nbsp;
+			<span id="strongIncre3" class="up"></span>/<span id="strongDerea3" class="down"></span>
+		</div>
+		<div class="row" style="color:grey">
+			<span id="incre3lastday"></span>/<span id="decrea3lastday"></span>&nbsp;
+			<span id="maxIncre3lastday"></span>&nbsp;
+			<span id="maxDecrea3lastday"></span>&nbsp;
+			<span id="strongIncre3lastday"></span>/<span id="strongDerea3lastday"></span>
+		</div>
+	</div>
+	<div class="col-md-3">
+		<div class="row">
+			<span class="marketName" title="399101.SZ">中小板指&nbsp;</span><span id="index4"></span>&nbsp;<span id="index4Rate"></span>&nbsp;&nbsp;</div>	
+		<div class="row">
+			<span id="incre4" class="up"></span>/<span id="decrea4" class="down"></span>&nbsp;
+			<span id="maxIncre4" class="up"></span>&nbsp;
+			<span id="maxDecrea4" class="down"></span>&nbsp;
+			<span id="strongIncre4" class="up"></span>/<span id="strongDerea4" class="down"></span>
+		</div>
+		<div class="row" style="color:grey">
+			<span id="incre4lastday"></span>/<span id="decrea4lastday"></span>&nbsp;
+			<span id="maxIncre4lastday"></span>&nbsp;
+			<span id="maxDecrea4lastday"></span>&nbsp;
+			<span id="strongIncre4lastday"></span>/<span id="strongDerea4lastday"></span>
+		</div>
+	</div>
+<style type="text/css">
+	.up{
+		color:#e52222;
+	}
+	.down{
+		color:green;
+	}
+</style>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript">
+	function updateData(){
+		$.ajax({
+			url:"{% url 'stock:marketInfo'%}",
+			type:"POST",
+			data:{},
+			success:function(result){
+				index = result[0].fields;
+				indexlastday = result[1].fields;
+				//上证
+				if(index.indexIncreaseSH > 0){
+					index.indexIncreaseSH = '+' + index.indexIncreaseSH
+					$('#index1Rate').addClass('up')
+				}else if(index[1] < 0){
+					$('#index1Rate').addClass('down')
+				}
+				$('#index1').text(index.indexSH + ' ' + index.indexIncreaseSH);
+				$('#index1Rate').text('(' + index.indexIncreaseRateSH + '%)') ;
+				$('#incre1').text(index.increaseStockSH) ;
+				$('#decrea1').text(index.decreaseStockSH) ;
+				$('#maxIncre1').text(index.limitupStcokSH + '涨停') ;
+				$('#maxDecrea1').text(index.limitdownStcokSH + '跌停');
+				$('#strongIncre1').text(index.longRedStcokSH) ;
+				$('#strongDerea1').text(index.longGreenStcokSH) ;
+				$('#incre1lastday').text(indexlastday.increaseStockSH) ;
+				$('#decrea1lastday').text(indexlastday.decreaseStockSH) ;
+				$('#maxIncre1lastday').text(indexlastday.limitupStcokSH + '涨停') ;
+				$('#maxDecrea1lastday').text(indexlastday.limitdownStcokSH + '跌停') ;
+				$('#strongIncre1lastday').text(indexlastday.longRedStcokSH);
+				$('#strongDerea1lastday').text(indexlastday.longGreenStcokSH);
+				//深证
+				if(index.indexIncreaseSZ > 0){
+					index.indexIncreaseSZ = '+' + index.indexIncreaseSZ
+					$('#index2Rate').addClass('up')
+				}else if(index[1] < 0){
+					$('#index2Rate').addClass('down')
+				}
+				$('#index2').text(index.indexSZ + ' ' + index.indexIncreaseSZ);
+				$('#index2Rate').text('(' + index.indexIncreaseRateSZ + '%)') ;
+				$('#incre2').text(index.increaseStockSZ) ;
+				$('#decrea2').text(index.decreaseStockSZ) ;
+				$('#maxIncre2').text(index.limitupStcokSZ + '涨停') ;
+				$('#maxDecrea2').text(index.limitdownStcokSZ + '跌停');
+				$('#strongIncre2').text(index.longRedStcokSZ) ;
+				$('#strongDerea2').text(index.longGreenStcokSZ) ;
+				$('#incre2lastday').text(indexlastday.increaseStockSZ) ;
+				$('#decrea2lastday').text(indexlastday.decreaseStockSZ) ;
+				$('#maxIncre2lastday').text(indexlastday.limitupStcokSZ + '涨停') ;
+				$('#maxDecrea2lastday').text(indexlastday.limitdownStcokSZ + '跌停') ;
+				$('#strongIncre2lastday').text(indexlastday.longRedStcokSZ);
+				$('#strongDerea2lastday').text(indexlastday.longGreenStcokSZ);
+				//创业板
+				if(index.indexIncreaseCYB > 0){
+					index.indexIncreaseCYB = '+' + index.indexIncreaseCYB
+					$('#index3Rate').addClass('up')
+				}else if(index[1] < 0){
+					$('#index3Rate').addClass('down')
+				}
+				$('#index3').text(index.indexCYB + ' ' + index.indexIncreaseCYB);
+				$('#index3Rate').text('(' + index.indexIncreaseRateCYB + '%)') ;
+				$('#incre3').text(index.increaseStockCYB) ;
+				$('#decrea3').text(index.decreaseStockCYB) ;
+				$('#maxIncre3').text(index.limitupStcokCYB + '涨停') ;
+				$('#maxDecrea3').text(index.limitdownStcokCYB + '跌停');
+				$('#strongIncre3').text(index.longRedStcokCYB) ;
+				$('#strongDerea3').text(index.longGreenStcokCYB) ;
+				$('#incre3lastday').text(indexlastday.increaseStockCYB) ;
+				$('#decrea3lastday').text(indexlastday.decreaseStockCYB) ;
+				$('#maxIncre3lastday').text(indexlastday.limitupStcokCYB + '涨停') ;
+				$('#maxDecrea3lastday').text(indexlastday.limitdownStcokCYB + '跌停') ;
+				$('#strongIncre3lastday').text(indexlastday.longRedStcokCYB);
+				$('#strongDerea3lastday').text(indexlastday.longGreenStcokCYB);
+				//中小板
+				if(index.indexIncreaseZXB > 0){
+					index.indexIncreaseZXB = '+' + index.indexIncreaseZXB
+					$('#index4Rate').addClass('up')
+				}else if(index[1] < 0){
+					$('#index4Rate').addClass('down')
+				}
+				$('#index4').text(index.indexZXB + ' ' + index.indexIncreaseZXB);
+				$('#index4Rate').text('(' + index.indexIncreaseRateZXB + '%)') ;
+				$('#incre4').text(index.increaseStockZXB) ;
+				$('#decrea4').text(index.decreaseStockZXB) ;
+				$('#maxIncre4').text(index.limitupStcokZXB + '涨停') ;
+				$('#maxDecrea4').text(index.limitdownStcokZXB + '跌停');
+				$('#strongIncre4').text(index.longRedStcokZXB) ;
+				$('#strongDerea4').text(index.longGreenStcokZXB) ;
+				$('#incre4lastday').text(indexlastday.increaseStockZXB) ;
+				$('#decrea4lastday').text(indexlastday.decreaseStockZXB) ;
+				$('#maxIncre4lastday').text(indexlastday.limitupStcokZXB + '涨停') ;
+				$('#maxDecrea4lastday').text(indexlastday.limitdownStcokZXB + '跌停') ;
+				$('#strongIncre4lastday').text(indexlastday.longRedStcokZXB);
+				$('#strongDerea4lastday').text(indexlastday.longGreenStcokZXB);
+
+				if(parent){
+					parent.window.updateLeftPage(index)
+				}
+				
+			},
+		});
+	}
+
+	$(document).ready(function(){
+		//bindEvent();
+        updateData();
+        setInterval(updateData,30000);
+    });
+
+	function bindEvent(){
+		$('span.marketName').bind({
+			mouseenter:function(e){
+				this.myTitle = this.title;
+				this.title = "";
+				if(parent){
+					x = e.clientX + 5;
+					if(e.clientX>800){
+						x = e.clientX - 400
+					}
+					layerIndex = parent.window.showMarketKLine(this.myTitle,e.clientY + 5 + "px",x + "px");
+				}
+			},
+			mouseleave:function(e){
+				this.title = this.myTitle;
+				if(parent){
+					//parent.window.closeMarketKLine(layerIndex);
+				}
+			}
+		});
+	}
+
+</script>
+{% endblock %}

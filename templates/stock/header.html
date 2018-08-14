@@ -1,0 +1,48 @@
+{% load staticfiles %}
+
+<div class="container">
+    <nav class="navbar navbar-inverse" role="navigation">
+        <div class="navbar-header">
+         <!--
+            <a class="navbar-brand" href="http://127.0.0.1:8000/stock/section">
+           
+                <img src="{% static 'images/logo.png' %}" width="100px">
+            </a>-->
+        </div>
+        <div>
+            <ul class="nav navbar-nav" role="tablist">
+                
+                <li class="active"><a href="{% url 'stock:stockMarket'%}">竞价排名</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">分时异动</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">量比排行</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">占比排行</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">换手排行</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">涨速排行</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">资金流入</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">大单流入</a></li>
+                <li><a href="{% url 'stock:stockMarket'%}">涨停活跃</a></li>
+                <li><a href="{% url 'stock:newsList'%}">资讯</a></li>
+                <li id="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">基础数据管理<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'stock:sectionList'%}">板块管理</a></li>
+                        <li><a href="{% url 'stock:stockSectionList'%}">股票板块管理</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right" style="margin-right:10px">
+            <!--
+                <li><a href="{% url 'blog:blog_title'%}">网站首页</a></li>
+                <li>{{ user.username }}</li>
+                <li><a href="{% url 'account:user_logout'%}">Logout</a></li>
+                -->
+            </ul>
+        </div>
+    </nav>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js'%}"></script>
+<script type="text/javascript">
+       $('.dropdown-toggle').dropdown();
+</script>

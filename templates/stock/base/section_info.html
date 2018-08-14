@@ -1,0 +1,551 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style type="text/css">
+.section-sort {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    margin-top: 32px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.section-sort-desc ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+.section-sort-desc {
+    width: 50%;
+    max-width: 600px;
+}
+.section-sort-title {
+    font-size: 14px;
+    text-align: left;
+    line-height: 1;
+    margin-bottom: 8px;
+    margin-left: 15px
+}
+
+.section-sort-bkj {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 80px;
+    flex: 0 0 80px;
+}
+
+.section-sort-bkj a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 80px;
+    height: 64px;
+    color: #fff;
+}
+
+.section-sort-bkj:nth-child(-n+3) {
+    margin-bottom: 4px;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 196px;
+    flex: 0 0 176px;
+}
+
+.section-sort-bkj:nth-child(-n+3) a {
+    width: 176px;
+    height: 76px;
+}
+
+[class*=hint--] {
+    position: relative;
+    display: inline-block;
+}
+.section-sort-bkj-title {
+    font-size: 12px;
+}
+.section-sort-bkj-rate {
+    font-size: 16px;
+}
+
+a {
+    color: #333;
+    background: transparent;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+    -webkit-transition: color .2s ease;
+    transition: color .2s ease;
+}
+
+li{
+	list-style: none;
+}
+
+.section-sort-stock {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 196px;
+    flex: 0 0 196px;
+}
+
+.section-sort-stock a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: flex-start;
+    -ms-flex-align: flex-start;
+    align-items: flex-start;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 196px;
+    height: 130px;
+    color: #fff;
+}
+
+.section-sort-stock a:hover {
+    text-decoration:none;
+}
+
+.section-sort-desc-stock ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+.section-sort-desc-stock {
+    width: 100%;
+    max-width: 100%;
+}
+
+.section-sort-bkj-rate-stock {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px
+}
+
+.stock-market-info {
+    font-size: 8px;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    color:white;
+}
+
+.stock-leader-info {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    color:yellow;
+	width: 100%;  
+    height: auto;  
+    word-wrap:break-word;  
+    word-break:break-all; 
+}
+
+.stock-section-info {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    color:black;
+	width: 100%;  
+    height: auto;  
+    word-wrap:break-word;  
+    word-break:break-all; 
+}
+
+.stock-mode-info{
+	width: 100%;  
+    height: auto;  
+    word-wrap:break-word;  
+    word-break:break-all; 
+}
+</style>
+
+<section class="section-sort-desc-stock">
+		<ul>
+			<li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+	            <a href="#" class="text-left" onclick="return showStockPage(1)">
+                    <p>
+                        <span class="glyphicon glyphicon-cog" onclick="setImportanStock(this,1)" title="" id="setup1"></span>
+                    </p>
+	          		<p class="section-sort-bkj-rate-stock" style="margin-top: 1px"><span id="mode1" class="stock-mode-info"</span></p>
+		            <div class="stock-market-info" id="stock1rate">
+    		            <div style="font-size: 250%;float:left;" id="stock1"></div>
+                        <span id="rate1"></span><br><span id="limituptime1"></span>
+		        	</div>
+		            <p class="stock-leader-info" id="importantInfo1"></p>
+		            <p class="stock-section-info" id="stocksection1"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+				<a href="#" class="text-left" onclick="return showStockPage(2)">
+					 <p>
+						 <span class="glyphicon glyphicon-cog" onclick="setImportanStock(this,2)" title="" id="setup2"></span>
+					 </p>
+					   <p class="section-sort-bkj-rate-stock" style="margin-top: 1px"><span id="mode2"></span></p>
+					 <div class="stock-market-info" id="stock2rate">
+						 <div style="font-size: 250%;float:left;" id="stock2"></div>
+						 <span id="rate2"></span><br><span id="limituptime2"></span>
+					 </div>
+					 <p class="stock-leader-info" id="importantInfo2"></p>
+					 <p class="stock-section-info" id="stocksection2"></p>
+				 </a>
+			</li>
+			<li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+				<a href="#" class="text-left" onclick="return showStockPage(3)">
+					<p>
+						<span class="glyphicon glyphicon-cog" onclick="setImportanStock(this,3)" title="" id="setup3"></span>
+					</p>
+					<p class="section-sort-bkj-rate-stock" style="margin-top: 1px"><span id="mode3"></span></p>
+					<div class="stock-market-info" id="stock3rate">
+						<div style="font-size: 250%;float:left;" id="stock3"></div>
+						<span id="rate3"></span><br><span id="limituptime3"></span>
+					</div>
+					<p class="stock-leader-info" id="importantInfo3"></p>
+					<p class="stock-section-info" id="stocksection3"></p>
+				</a>
+			</li>
+			<li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+				<a href="#" class="text-left" onclick="return showStockPage(4)">
+					<p>
+						<span class="glyphicon glyphicon-cog" onclick="setImportanStock(this,4)" title="" id="setup4"></span>
+					</p>
+					<p class="section-sort-bkj-rate-stock" style="margin-top: 1px"><span id="mode4"></span></p>
+					<div class="stock-market-info" id="stock4rate">
+						<div style="font-size: 250%;float:left;" id="stock4"></div>
+						<span id="rate1"></span><br><span id="limituptime4"></span>
+					</div>
+					<p class="stock-leader-info" id="importantInfo4"></p>
+					<p class="stock-section-info" id="stocksection4"></p>
+				</a>
+			</li>
+			<li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+				<a href="#" class="text-left" onclick="return showStockPage(5)">
+					<p>
+						<span class="glyphicon glyphicon-cog" onclick="setImportanStock(this,5)" title="" id="setup5"></span>
+					</p>
+					<p class="section-sort-bkj-rate-stock" style="margin-top: 1px"><span id="mode5"></span></p>
+					<div class="stock-market-info" id="stock5rate">
+						<div style="font-size: 250%;float:left;" id="stock5"></div>
+						<span id="rate1"></span><br><span id="limituptime5"></span>
+					</div>
+					<p class="stock-leader-info" id="importantInfo5"></p>
+					<p class="stock-section-info" id="stocksection5"></p>
+				</a>
+			</li>
+		</ul>
+
+</section>
+<section class="section-sort">
+	<section class="section-sort-desc">
+		<ul>
+			<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+	          	<a href="#" onclick="return showSectionPage(this)">
+		            <h3 class="section-sort-bkj-title" id="increaseTop1Name"></h3>
+		            <p class="section-sort-bkj-rate" id="increaseTop1Rate"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+		            <h3 class="section-sort-bkj-title" id="increaseTop2Name"></h3>
+		            <p class="section-sort-bkj-rate" id="increaseTop2Rate"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+		            <h3 class="section-sort-bkj-title" id="increaseTop3Name"></h3>
+		            <p class="section-sort-bkj-rate" id="increaseTop3Rate"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="increaseTop4Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="increaseTop4Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="increaseTop5Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="increaseTop5Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="increaseTop6Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="increaseTop6Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="increaseTop7Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="increaseTop7Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="increaseTop8Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="increaseTop8Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(242, 86, 78, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="increaseTop9Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="increaseTop9Rate"></p>
+	            </a>
+        	</li>
+		</ul>
+	</section>
+
+	<section class="section-sort-desc">
+		<ul>
+			<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+		            <h3 class="section-sort-bkj-title" id="speedTop1Name"></h3>
+		            <p class="section-sort-bkj-rate" id="speedTop1Rate"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+		            <h3 class="section-sort-bkj-title" id="speedTop2Name"></h3>
+		            <p class="section-sort-bkj-rate" id="speedTop2Rate"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+		            <h3 class="section-sort-bkj-title" id="speedTop3Name"></h3>
+		            <p class="section-sort-bkj-rate" id="speedTop3Rate"></p>
+	        	</a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="speedTop4Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="speedTop4Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="speedTop5Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="speedTop5Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="speedTop6Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="speedTop6Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="speedTop7Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="speedTop7Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="speedTop8Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="speedTop8Rate"></p>
+	            </a>
+        	</li>
+        	<li class="section-sort-bkj" style="background:rgba(129, 61, 87, 0.75);">
+				<a href="#" onclick="return showSectionPage(this)">
+	            	<h3 class="section-sort-bkj-title"" id="speedTop9Name"></h3>
+	            	<p class="section-sort-bkj-rate" id="speedTop9Rate"></p>
+	            </a>
+        	</li>
+		</ul>
+	</section>
+</section>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+function updateData(){
+	$.ajax({
+		url:"{% url 'stock:sectionInfoHomepage'%}",
+		type:"POST",
+		data:{},
+		success:function(result){
+			if(result[0] == '0'){
+				increaseTop9 = result[1];
+				if(increaseTop9.length == 0){
+					return;
+				}
+				speedTop9 = result[2];
+				importantStocksInfo = result[3];
+				$('#increaseTop1Name').text(increaseTop9[0][0]);
+				$('#increaseTop1Rate').text(increaseTop9[0][1]);
+				$('#increaseTop2Name').text(increaseTop9[1][0]);
+				$('#increaseTop2Rate').text(increaseTop9[1][1]);
+				$('#increaseTop3Name').text(increaseTop9[2][0]);
+				$('#increaseTop3Rate').text(increaseTop9[2][1]);
+				$('#increaseTop4Name').text(increaseTop9[3][0]);
+				$('#increaseTop4Rate').text(increaseTop9[3][1]);
+				$('#increaseTop5Name').text(increaseTop9[4][0]);
+				$('#increaseTop5Rate').text(increaseTop9[4][1]);
+				$('#increaseTop6Name').text(increaseTop9[5][0]);
+				$('#increaseTop6Rate').text(increaseTop9[5][1]);
+				$('#increaseTop7Name').text(increaseTop9[6][0]);
+				$('#increaseTop7Rate').text(increaseTop9[6][1]);
+				$('#increaseTop8Name').text(increaseTop9[7][0]);
+				$('#increaseTop8Rate').text(increaseTop9[7][1]);
+				$('#increaseTop9Name').text(increaseTop9[8][0]);
+				$('#increaseTop9Rate').text(increaseTop9[8][1]);
+
+				$('#speedTop1Name').text(speedTop9[0][0]);
+				$('#speedTop1Rate').text(speedTop9[0][3]);
+				$('#speedTop2Name').text(speedTop9[1][0]);
+				$('#speedTop2Rate').text(speedTop9[1][3]);
+				$('#speedTop3Name').text(speedTop9[2][0]);
+				$('#speedTop3Rate').text(speedTop9[2][3]);
+				$('#speedTop4Name').text(speedTop9[3][0]);
+				$('#speedTop4Rate').text(speedTop9[3][3]);
+				$('#speedTop5Name').text(speedTop9[4][0]);
+				$('#speedTop5Rate').text(speedTop9[4][3]);
+				$('#speedTop6Name').text(speedTop9[5][0]);
+				$('#speedTop6Rate').text(speedTop9[5][3]);
+				$('#speedTop7Name').text(speedTop9[6][0]);
+				$('#speedTop7Rate').text(speedTop9[6][3]);
+				$('#speedTop8Name').text(speedTop9[7][0]);
+				$('#speedTop8Rate').text(speedTop9[7][3]);
+				$('#speedTop9Name').text(speedTop9[8][0]);
+				$('#speedTop9Rate').text(speedTop9[8][3]);
+
+				$('#setup1').attr('title',importantStocksInfo[0])
+				$('#stock1').text(importantStocksInfo[1]);
+				$('#rate1').text(importantStocksInfo[2]);
+				$('#limituptime1').text(importantStocksInfo[3]);
+				$('#importantInfo1').text(importantStocksInfo[4]);
+				$('#mode1').text(importantStocksInfo[5]);
+				$('#stocksection1').text(importantStocksInfo[6]);
+				
+				$('#setup2').attr('title',importantStocksInfo[7])
+				$('#stock2').text(importantStocksInfo[8]);
+				$('#rate2').text(importantStocksInfo[9]);
+				$('#limituptime2').text(importantStocksInfo[10]);
+				$('#importantInfo2').text(importantStocksInfo[11]);
+				$('#mode2').text(importantStocksInfo[12]);
+				$('#stocksection2').text(importantStocksInfo[13]);
+
+				$('#setup3').attr('title',importantStocksInfo[14])
+				$('#stock3').text(importantStocksInfo[15]);
+				$('#rate3').text(importantStocksInfo[16]);
+				$('#limituptime3').text(importantStocksInfo[17]);
+				$('#importantInfo3').text(importantStocksInfo[18]);
+				$('#mode3').text(importantStocksInfo[19]);
+				$('#stocksection3').text(importantStocksInfo[20]);
+
+				$('#setup4').attr('title',importantStocksInfo[21])
+				$('#stock4').text(importantStocksInfo[22]);
+				$('#rate4').text(importantStocksInfo[23]);
+				$('#limituptime4').text(importantStocksInfo[24]);
+				$('#importantInfo4').text(importantStocksInfo[25]);
+				$('#mode4').text(importantStocksInfo[26]);
+				$('#stocksection4').text(importantStocksInfo[27]);
+
+				$('#setup5').attr('title',importantStocksInfo[28])
+				$('#stock5').text(importantStocksInfo[29]);
+				$('#rate5').text(importantStocksInfo[30]);
+				$('#limituptime5').text(importantStocksInfo[31]);
+				$('#importantInfo5').text(importantStocksInfo[32]);
+				$('#mode5').text(importantStocksInfo[33]);
+				$('#stocksection5').text(importantStocksInfo[34]);
+			}else{
+				layer.msg(result[1]);
+			}
+		},
+	});
+}
+
+$(document).ready(function(){
+	updateData();
+	setInterval(updateData,60000);
+});
+
+
+function showSectionPage(obj){
+	var sectionname = $(obj).children('h3').text();
+	var url = "{% url 'stock:stockListAjax'%}?type=sectionList&queryValue=" + sectionname;
+	if(parent){
+		parent.window.changeiframe(url);
+	}
+	return false;
+}
+
+function showStockPage(position){
+	var stockId = $('#setup' + position).attr('title')
+	var url = "{% url 'stock:stockInfoAjax'%}?stockId=" + stockId;
+	if(parent){
+		parent.window.changeiframe(url);
+	}
+	return false;
+}
+
+    
+function setImportanStock(obj,position){
+    var index = layer.open({
+        type:1,
+        skin:"layui-layer-rim",
+        area:["300px","250px"],
+        title:"设置显示股票",
+        content:'<div class="text-center" style="margin-top:20px"><p>请输入股票代码</p><p><input type="text" id="stockId" value="' + $(obj).attr('title') +'"></p></div>',
+        btn:['确认','取消'],
+        yes:function(index,layero){
+            stockId = $('#stockId').val();
+            $.ajax({
+                url:'{% url "stock:setImportantStock"%}',
+                type:'POST',
+                data:{"stockId":stockId,"position":position},
+                success:function(e){
+                    if(e=='1'){
+                        //parent.location.reload();
+                        layer.msg("设置成功");
+                        $(obj).title = stockId;
+                    }else{
+                        layer.msg(e);
+                    }
+					layer.close(index)
+                },
+            });
+        },
+        btn2:function(index,layero){
+            layer.close(index)
+        }
+    });
+}
+</script>
+{% endblock %}

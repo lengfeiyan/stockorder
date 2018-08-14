@@ -1,0 +1,235 @@
+{% load staticfiles %}
+<html lang="zh-cn">
+<head>
+   <meta charset="UTF-8">
+    <title>K线图</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sortedtable.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery.js'%}"></script>
+	<script type="text/javascript" src="{% static 'js/bootstrap.js'%}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'layui/css/layui.css'%}"  media="all">
+</head>
+<style>
+    .iframeclass{
+    margin-bottom:0;
+    margin-top:0;
+    margin-right:0;
+    margin-left:10px;
+    border: 0;
+  }
+  .section-sort-desc-stock {
+    width: 100%;
+    max-width: 100%;
+}
+
+.section-sort-desc-stock ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+  li{
+	list-style: none;
+}
+
+.section-sort-stock {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 96px;
+    flex: 0 0 96px;
+}
+
+.section-sort-stock a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: flex-start;
+    -ms-flex-align: flex-start;
+    align-items: flex-start;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 96px;
+    height: 66px;
+    color: #fff;
+}
+
+.section-sort-stock a:hover {
+    text-decoration:none;
+}
+.stock-leader-info {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color:white;
+	  width: 100%;  
+    height: auto;  
+    word-wrap:break-word;  
+    word-break:break-all; 
+}
+
+.stock-section-info {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color:white;
+	  width: 100%;  
+    height: auto;  
+    word-wrap:break-word;  
+    word-break:break-all; 
+}
+</style>
+<body style="width:1000px">
+
+  <div class="row" style="margin-left: 15px;margin-top:15px">
+      <div class="col-md-2 text-center">
+      <span style="color:red"><h2>{{stockName}}</h2></span>
+      <span style="color:red;margin-top:2px">{{stockId}}</span>
+      </div>
+      <div class="col-md-10 text-left">
+          <section class="section-sort-desc-stock">
+        <ul>
+        {% for sectionIncreaseInfo in sectionIncreaseInfoList %}
+        <li class="section-sort-stock" style="background:rgba(212, 82, 75, 0.75);">
+            <a href="#" class="text-center">
+              <p class="stock-leader-info">{{sectionIncreaseInfo.0}}</p>
+              <p class="stock-section-info">{{sectionIncreaseInfo.1}}</p>
+            </a>
+        </li>
+        {% endfor %}
+        </ul>
+        </section>
+      </div>
+  </div>
+  <div class="row">
+    <div class="col-md-10">
+        <div class="layui-tab layui-tab-card"  lay-filter="lines">
+            <ul class="layui-tab-title">
+              <li class="layui-this">分时图</li>
+              <li>日K</li>
+              <li>60分</li>
+              <li>30分</li>
+              <li>15分</li>
+              <li>5分</li>
+            </ul>
+            <div class="layui-tab-content" style="height:560px;padding-right: 0">
+              <div class="layui-tab-item layui-show">
+                <iframe src="{% url 'stock:minsLine'%}?stockId={{stockId}}" width="750" height="460" allowtransparency="true" class="iframeclass"></iframe>
+              </div>
+              <div class="layui-tab-item">
+                <iframe id="daykline" src="" width="750" height="560" allowtransparency="true" class="iframeclass"></iframe>
+              </div>              
+              <div class="layui-tab-item">
+                  <iframe id="minsline60" src="" width="750" height="560" allowtransparency="true" class="iframeclass"></iframe>
+              </div>
+              <div class="layui-tab-item">
+                  <iframe id="minsline30" src="" width="750" height="560" allowtransparency="true" class="iframeclass"></iframe>
+              </div>
+              <div class="layui-tab-item">
+                  <iframe id="minsline15" src="" width="750" height="560" allowtransparency="true" class="iframeclass"></iframe>
+              </div>
+              <div class="layui-tab-item">
+                  <iframe id="minsline5" src="" width="750" height="560" allowtransparency="true" class="iframeclass"></iframe>
+              </div>
+            </div>
+          </div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+    
+
+</body>
+<script src="{% static 'layui/layui.js'%}" charset="utf-8"></script>
+<script>
+  var daykline = 0;
+  var minsline5 = 0;
+  var minsline15 = 0;
+  var minsline30 = 0;
+  var minsline60 = 0;
+layui.use('element', function(){
+  var $ = layui.jquery
+  ,element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+  
+  //触发事件
+  var active = {
+    tabAdd: function(){
+      //新增一个Tab项
+      element.tabAdd('demo', {
+        title: '新选项'+ (Math.random()*1000|0) //用于演示
+        ,content: '内容'+ (Math.random()*1000|0)
+        ,id: new Date().getTime() //实际使用一般是规定好的id，这里以时间戳模拟下
+      })
+    }
+    ,tabDelete: function(othis){
+      //删除指定Tab项
+      element.tabDelete('demo', '44'); //删除：“商品管理”
+      
+      
+      othis.addClass('layui-btn-disabled');
+    }
+    ,tabChange: function(){
+      //切换到指定Tab项
+      element.tabChange('demo', '22'); //切换到：用户管理
+    }
+  };
+  
+  $('.site-demo-active').on('click', function(){
+    var othis = $(this), type = othis.data('type');
+    active[type] ? active[type].call(this, othis) : '';
+  });
+  
+  //Hash地址的定位
+  var layid = location.hash.replace(/^#test=/, '');
+  element.tabChange('test', layid);
+  
+  element.on('tab(test)', function(elem){
+    location.hash = 'test='+ $(this).attr('lay-id');
+  });
+
+  element.on('tab(lines)', function(elem){
+    if(elem.index == 1){
+      if(daykline == 0){
+        daykline = 1;
+        document.getElementById('daykline').src = "{% url 'stock:daysLine'%}?stockId={{stockId}}";
+      }
+    }
+    if(elem.index == 5){
+      if(minsline5 == 0){
+        minsline5 = 1;
+        document.getElementById('minsline5').src = "{% url 'stock:minsKLine'%}?stockId={{stockId}}&mins=5";
+      }
+    }
+    if(elem.index == 4){
+      if(minsline15 == 0){
+        minsline15 = 1;
+        document.getElementById('minsline15').src = "{% url 'stock:minsKLine'%}?stockId={{stockId}}&mins=15";
+      }
+    }
+    if(elem.index == 3){
+      if(minsline30 == 0){
+        minsline30 = 1;
+        document.getElementById('minsline30').src = "{% url 'stock:minsKLine'%}?stockId={{stockId}}&mins=30";
+      }
+    }
+    if(elem.index == 2){
+      if(minsline60 == 0){
+        minsline60 = 1;
+        document.getElementById('minsline60').src = "{% url 'stock:minsKLine'%}?stockId={{stockId}}&mins=60";
+      }
+    }
+  });
+  
+});
+</script>
+</html>

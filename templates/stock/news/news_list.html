@@ -1,0 +1,116 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<link rel="stylesheet" href="{% static 'layui/css/layui.css' %}">
+<style type="text/css">
+    .bullish-and-bear.bullish {
+    background: #e6394d;
+}
+
+.bullish-and-bear {
+    padding: 5px;
+    color: #fff;
+    font-size: 13px;
+    margin-left: 3px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.bullish-and-bear.bear {
+    background: #18a66b;
+}
+</style>
+<div style="width:90%">
+    <fieldset class="layui-elem-field layui-field-title">
+      <legend>最新资讯</legend>
+    </fieldset>
+    <ul id="newsList">
+        
+    </ul>
+    <div class="text-center" style="display:none" id="loadmore">
+        <span class="glyphicon glyphicon-chevron-down" style="cursor:pointer;font-size: 150%" onclick="updateData('append')">点击加载更多</span>
+    </div>
+</div>
+
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript" src="{% static "layui/layui.js"%}"></script>
+<script type="text/javascript">
+var newsest_datetime = '';
+var pagesize = {{pagesize}};
+
+    function updateData(appendType){
+        $.ajax({
+            url:"{% url 'stock:newsList'%}",
+            type:"POST",
+            data:{'newsest_datetime':newsest_datetime},
+            success:function(result){
+                for(i=0;i<result.length;i++){
+                    if(i == 0){
+                        newsest_datetime = result[i].fields.datetime;
+                    }
+                    htmlstr = '<li style="display:none" class="layui-timeline-item">';
+                    htmlstr = htmlstr + '<i class="layui-icon layui-timeline-axis">&#xe63f;</i>';
+                    htmlstr = htmlstr + '<div class="layui-timeline-content layui-text">';
+                    htmlstr = htmlstr + '<h3 class="layui-timeline-title">' + result[i].fields.title;
+                    if(result[i].fields.isbull.indexOf('利好') != -1){
+                        htmlstr = htmlstr + '<span class="bullish-and-bear bullish">' + result[i].fields.isbull + '</span>';
+                    }else if(result[i].fields.isbull.indexOf('利空') != -1){
+                        htmlstr = htmlstr + '<span class="bullish-and-bear bear">' + result[i].fields.isbull + '</span>';
+                    }
+                    htmlstr = htmlstr + '</h3><h5>' + result[i].fields.datetime + '</h5>';
+                    htmlstr = htmlstr + '<p><h4>' + result[i].fields.content + '</h4></p><br>';
+                    htmlstr = htmlstr + '<p>';
+                    if('' != result[i].fields.stocks){
+                        stocks = result[i].fields.stocks.split(',')
+                        for(j=0;j<stocks.length;j++){
+                            htmlstr = htmlstr + '<a  href="#" style="color:#e52222;margin-right:5px;">'; 
+                            htmlstr = htmlstr + '<span style="display: inline-block;" class="glyphicon glyphicon-signal">';
+                            htmlstr = htmlstr + stocks[j].replace(' ','') +'</span></a>';
+                        }
+                    }
+                    if('' != result[i].fields.sections){
+                        sections = result[i].fields.sections.split(',')
+                        for(j=0;j<sections.length;j++){
+                            htmlstr = htmlstr + '<a href="#" style="border: 1px solid #4c5466;line-height: 12px; padding: 4px;margin-right:5px;color:#4c5466">'+ sections[j].replace(' ','')  +'</a>';
+                        }
+                    }
+                    htmlstr = htmlstr + '</p></div></li>';
+                    if(appendType == 'append'){
+                        var li = $(htmlstr);
+                        $('#newsList').append(li);
+                        li.fadeIn(800);
+                    }else{
+                        var li = $(htmlstr);
+                        $('#newsList').prepend(li);
+                        li.fadeIn(800);
+                        
+                        var liArr = $('#newsList li');
+                        liArr[liArr.length-1].remove();
+                    }
+
+                    //if($("#loadmore")[0].style.display == 'none'){
+                    //    $("#loadmore").show();
+                    //}
+                    //if(pagesize >= result.length){
+                    //    $("#loadmore").hide();
+                   // }
+                }
+            },
+        });
+    }
+
+    $(document).ready(function(){
+        updateData('append');
+        setInterval(function(){
+            updateData('prepend');
+        },30000);
+    });
+
+</script>
+
+{% endblock %}

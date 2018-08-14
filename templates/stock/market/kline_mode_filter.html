@@ -1,0 +1,42 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<div class="container">
+    <div class="row" style="margin-top: 25px">
+        {% for key,value in klineMode.items %}
+            {% if value.1 == 1%}
+            <input name="checkitem" type="checkbox" id="{{key}}" checked="checked" value="{{key}}">{{value.0}}
+            {% else%}
+            <input name="checkitem" type="checkbox" id="{{key}}" value="{{key}}">{{value.0}}
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="row text-center" style="margin-top: 25px">
+        <button class="btn btn-primary"  onclick="submit()">确定</button>
+        <button class="btn btn-primary" onclick="closeFilter()">取消</button>
+    </div>
+</div>
+<script>
+function submit(){
+    selectedMode = ''
+    $('[name=checkitem]:checkbox:checked').each(function(){
+        if(selectedMode == ''){
+            selectedMode = $(this).val();
+        }else{
+            selectedMode = selectedMode + ',' + $(this).val();
+        }
+
+    });
+    parent.setSelectedMode(selectedMode)
+}
+
+function closeFilter(){
+    parent.closeFilter()
+}
+
+</script>
+{% endblock %}

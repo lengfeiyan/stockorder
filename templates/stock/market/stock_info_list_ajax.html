@@ -1,0 +1,341 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style type="text/css">
+a {
+    color: #333;
+    background: transparent;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+    -webkit-transition: color .2s ease;
+    transition: color .2s ease;
+}
+
+li{
+    list-style: none;
+}
+
+.section-sort-stock {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 278px;
+    flex: 0 0 278px;
+    display: flex;
+    margin-bottom:5px;
+}
+
+.section-sort-stock a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: flex-start;
+    -ms-flex-align: flex-start;
+    align-items: flex-start;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 139px;
+    height: 100px;
+    color: #fff;
+}
+
+.section-sort-stock a:hover {
+    text-decoration:none;
+    cursor:default;
+}
+
+.section-sort-desc-stock ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+.section-sort-desc-stock {
+    width: 100%;
+    max-width: 1200px;
+}
+
+.section-sort-bkj-rate-stock {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px
+}
+
+.section-sort-bkj-rate-stock-mode {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    width: 100%;  
+    height: auto;  
+    word-wrap:break-word;  
+    word-break:break-all; 
+}
+
+.stock-hover{
+    font-size: 160%;
+    float:left;
+}
+
+#tooltip {
+    position: absolute;
+    border: 1px solid #333;
+    background: #f7f5d1;
+    padding: 1px;
+    color: #333;
+    display: none;
+}
+
+</style>
+    
+    <p class="text-right">
+    <button class="btn btn-primary" id="pastebtn">复制代码</button>
+    </p>
+
+    <section class="section-sort-desc-stock">
+        <ul id="data"></ul>
+    </section>
+    <div class="alert alert-info" style="width:100%;display:none;" id="emptyInfo">查询结果为空</div>
+<script type="text/javascript" src="{% static "js/clipboard.min.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+var clipboard = new ClipboardJS('#pastebtn', {
+    text: function() {
+        return '{{stockId}}';
+    }
+});
+
+clipboard.on('success', function(e) {
+
+});
+
+clipboard.on('error', function(e) {
+    alert(e);
+});
+
+function checkall(checked){
+    $('[name=checkitem]:checkbox').prop('checked',checked);
+}
+
+function check(obj){
+    value = $(obj).prop('checked');
+    if(value == true){
+        $(obj).prop("checked", false)
+    }else{        
+        $(obj).prop("checked", true)
+    }
+}
+
+function updateData(firstTime){
+    var index = -1;
+    if(firstTime == true){
+        index = layer.load(0, {shade:false,offset:"25px"});
+    }
+    $.ajax({
+        url:"{% url 'stock:stockInfoAjax'%}",
+        type:"POST",
+        data:{'stockId':'{{stockId}}'},
+        success:function(returnData){
+            if(returnData[0] == 0){
+                $('#emptyInfo').hide();
+                //console.time("global");
+                result = returnData[1];
+                if(firstTime == false){
+                    index = layer.load(0, {shade:false,offset:"25px"});
+                }
+                var liarr = $('#data li');
+                for(i=0;i<liarr.length;i++){
+                    liarr[i].remove();
+                }
+                if(result.length == 0){
+                    $('#emptyInfo').show();
+                }
+                for(i=0;i<result.length;i++){
+                    htmlstr = '';
+                    if(i == 0){
+                        htmlstr = '<li class="section-sort-stock" >';
+                        htmlstr += '<a href="#" target="_blank" class="text-left "  style="background:rgba(212, 213, 209, 1);" onclick="return false">';
+                        //htmlstr += '<p><input type="checkbox" name="checkitem" value="' + result[i].stockId + '" onclick="check(this)"></p>';
+                        htmlstr += ' <div class="section-sort-bkj-rate-stock" style="color:red;font-weight: bold" id="stock1rate">';
+                        htmlstr += '<div class="stock-hover" title="' + result[i].stockId + '">' + result[i].stockName + '';
+                        htmlstr += '</div>'
+                        if(result[i].hasBull == true){
+                            htmlstr += '<span class="glyphicon glyphicon-certificate" color="red"></span>'
+                        }
+                        htmlstr += result[i].increasePercentage;
+                        
+                        htmlstr += '</div>';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock"  style="color:black">' + result[i].limitUpInfo + '';
+                        htmlstr += '<span class="glyphicon glyphicon-asterisk" title="' + result[i].mainBiz + '"></span></p></a>';
+                        htmlstr += '<a href="#" target="_blank" class="text-left" style="background:rgba(248, 165, 165, 1);color:black" onclick="return false">';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock-mode" style="margin-top: 5px"><span>' + result[i].klineMode + '</span></p>';
+                        //htmlstr += '<p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>' + result[i].limitUpInfo + '</span></p>';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock-mode">';
+                        for(j=0;j<result[i].newsList.length;j++){
+                            color = 'white';
+                            if(result[i].newsList[j].isbull.indexOf('利好') != -1){
+                                color = 'red';
+                            }else if(result[i].newsList[j].isbull.indexOf('利空') != -1){
+                                color = 'green';
+                            }
+                            content = result[i].newsList[j].datetime + ':' + result[i].newsList[j].title + ' '+ result[i].newsList[j].isbull  + '<br>' + result[i].newsList[j].content;
+                            htmlstr += '<span class="glyphicon glyphicon-list-alt" style="color:' + color +'" title="';
+                            htmlstr += content + '"></span>';
+                        }
+                        htmlstr += '</p></a></li>';
+                    }else{
+                        htmlstr += '<li class="section-sort-stock">';
+                        htmlstr += '<a href="#" style="background:white;" onclick="return false"></a>';
+                        htmlstr += '<a href="#" style="background:white;" onclick="return false"></a>';
+                        htmlstr += '</li>';
+                    }
+                        
+                    for(j=0;j<result[i].sectionList.length;j++){
+                        htmlstr += '<li class="section-sort-stock"  style="color:black">';
+                        htmlstr += '<a href="#" target="_blank"  style="background:rgba(212, 213, 209, 1);" onclick="return false">';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock" style="margin-top: 5px">';
+                        htmlstr += '<span style="color:blue;font-weight:bold">' + result[i].sectionList[j].sectionName + ' </span>';
+                        htmlstr += '<span style="color:rgba(246, 32, 233, 1)">' + result[i].sectionList[j].sectionIncreaseRateStr + '</span>';
+                        htmlstr += '<span style="color:rgba(246, 32, 233, 1)">' + result[i].sectionList[j].increaseCount + '/' + result[i].sectionList[j].decreaseCount + '</span></p>';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock" style="margin-top: 5px">';
+                        htmlstr += '<span style="color:red">' + result[i].sectionList[j].limitUpCount + '股封</span>';
+                        htmlstr += '<span style="color:blue"> ' + result[i].sectionList[j].badLimitUpCount + '股烂 </span>';
+                        htmlstr += '<span style="color:red">' + result[i].sectionList[j].threeStraightLimitUp + '股3板+</span></p>';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock-mode">';
+                        for(m=0;m<result[i].sectionList[j].newsList.length;m++){
+                            color = 'white';
+                            if(result[i].sectionList[j].newsList[m].isbull.indexOf('利好') != -1){
+                                color = 'red';
+                            }else if(result[i].sectionList[j].newsList[m].isbull.indexOf('利空') != -1){
+                                color = 'green';
+                            }
+                            content = result[i].sectionList[j].newsList[m].datetime + ':' + result[i].sectionList[j].newsList[m].title + ' '+ result[i].sectionList[j].newsList[m].isbull  + '<br>' + result[i].sectionList[j].newsList[m].content;
+                            htmlstr += '<span class="glyphicon glyphicon-asterisk" style="color:' + color +'" title="';
+                            htmlstr += content + '"></span>';
+                        }
+                        htmlstr += '</p></a>';
+                        htmlstr += '<a href="#" target="_blank" class="text-left" style="background:rgba(248, 165, 165, 1);"  onclick="return false">';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock" style="margin-top: 5px">';
+                        htmlstr += '板:<span>' + result[i].sectionList[j].limitUpStocksShow + '</span>';
+                        if(result[i].sectionList[j].limitUpStocksHidden != ''){
+                            htmlstr += '<span class="glyphicon glyphicon-plus" title="' + result[i].sectionList[j].limitUpStocksHidden + '" style="color:"></span>';
+                        }
+                        htmlstr += '</p>';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock" style="margin-top: 5px">';
+                        htmlstr += '烂:<span>' + result[i].sectionList[j].badLimitUpStocksShow + '</span>';
+                        if(result[i].sectionList[j].badLimitUpStocksHidden != ''){
+                            htmlstr += '<span class="glyphicon glyphicon-plus" title="' + result[i].sectionList[j].badLimitUpStocksHidden + '" style="color:"></span>';
+                        }
+                        htmlstr += '</p>';
+                        htmlstr += '<p class="section-sort-bkj-rate-stock" style="margin-top: 5px">';
+                        htmlstr += '动:<span>' + result[i].sectionList[j].specialStockShow + '</span>';
+                        if(result[i].sectionList[j].specialStockHidden != ''){
+                            htmlstr += '<span class="glyphicon glyphicon-plus" title="' + result[i].sectionList[j].specialStockHidden + '" style="color:"></span>';
+                        }
+                        htmlstr += '</p>';
+                        htmlstr += '</a></li>';
+
+                    }
+                    for(j=0;j<result[i].emptyBlock;j++){
+                        htmlstr += '<li class="section-sort-stock">';
+                        htmlstr += '<a href="#" style="background:white;" onclick="return false"></a>';
+                        htmlstr += '<a href="#" style="background:white;" onclick="return false"></a>';
+                        htmlstr += '</li>';
+                    }
+                
+                    $('#data').append(htmlstr);
+                
+                }
+                //console.timeEnd("global");
+                bindEvent();
+                layer.close(index);
+            }else{
+                layer.close(index);
+                layer.msg(returnData[1]);
+            }
+        },
+    });
+}
+
+$(document).ready(function(){
+    updateData(true);
+    setInterval(function(){
+        updateData(false);
+    },30000);
+});
+layerIndex = -1;
+function bindEvent(){
+    var x = 10;
+    var y = 20;
+    $('div.stock-hover').bind({
+        mouseenter:function(e){
+            if(layerIndex != -1){
+                return;
+            }
+            this.myTitle = this.title;
+            var market = this.myTitle.substr(0,2);
+            if(market == 'SH'){
+                market = 'SS';
+            }
+            stockId = this.myTitle.substr(2) + '.' + market;
+            this.title = "";
+            y = e.clientY + 5;
+            if(e.clientY > 525){
+                y = e.clientY - 475;
+            }
+            layerIndex = layer.open({
+              type: 2,
+              title: '',
+              shadeClose: true,
+              closeBtn: 1,
+              shade: 0,
+              area:["878px","475px"],
+              offset:[y + "px",e.pageX + 5 + "px"],
+              content: 'https://wallstreetcn.com/markets/widget/ashares/' + stockId,
+              end:function(){
+                layerIndex = -1;
+              }
+            });
+        },
+        mouseleave:function(e){
+            this.title = this.myTitle
+            //layer.close(layerIndex)
+        }
+    });
+
+    $("span.glyphicon").mouseover(function (e) {
+        this.myTitle = this.title;
+        this.title = "";
+        var tooltip = "<div id='tooltip'>" + this.myTitle + "<\/div>"; //创建 div 元素 文字提示
+        $("body").append(tooltip);  //把它追加到文档中
+        $("#tooltip").css({
+            "top": (e.pageY + 5) + "px",
+            "left": (e.pageX + 5) + "px"
+        }).show("fast");      //设置x坐标和y坐标，并且显示
+    }).mouseout(function () {
+        this.title = this.myTitle;
+        $("#tooltip").remove();   //移除
+    }).mousemove(function (e) {
+        $("#tooltip").css({
+            "top": (e.pageY + 5) + "px",
+            "left": (e.pageX + 5) + "px"
+        });
+    });
+}
+</script>
+{% endblock %}

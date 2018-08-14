@@ -1,0 +1,214 @@
+{% extends "stock/base_single.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<div>
+     <p class="text-left">板块名称：{{sectionInfoForm.sectionName}}
+    </p>
+    <p class="text-right">
+    <button class="btn btn-primary" id="query" onclick="query()">查询</button>
+    <button class="btn btn-primary" id="add_section" onclick="add_section()">新增板块</button>
+    <button class="btn btn-primary" id="merge_section" onclick="merge_section()">合并板块</button>
+    </p>
+    <table class="table table-hover">
+        <tr>
+            <td>序号</td>
+            <td>板块名称</td>
+            <td>板块简介</td>
+            <td>操作</td>
+        </tr>
+        {% for row in list %}
+        <tr id="{{row.id}}">
+            <td>{{ forloop.counter }}</td>
+            <td><a href="/stock/section_market_info?sectionid={{row.id}}">{{ row.sectionName }}</a></td>
+            <td>{{ row.desc }}</td>
+            <td>
+            <a name="edit" href="javascript:" onclick="edit_section(this,{{row.id}},'{{row.sectionName}}')" title="修改板块"> <span class="glyphicon glyphicon-pencil"></span>
+                </a>
+            <a name="add_stock" href="javascript:" onclick="add_stock(this,'{{row.sectionName}}')" title="添加股票"><span class="glyphicon glyphicon-plus-sign" style="margin-left:20px"></span></a>
+            <a name="delete" href="javascript:" onclick="del_section(this,{{row.id}},'{{row.sectionName}}')" title="删除板块"><span class="glyphicon glyphicon-trash" style="margin-left:20px"></span></a>
+                </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% include "paginator.html "%}
+</div>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+function query(){
+url = "?page=1&sectionName=" + $("#id_sectionName").val();
+location.replace(url) ;
+
+}
+
+    function add_section(){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"新增板块",
+            content:'<div class="text-center" style="margin-top:20px"><p>请输入板块名称</p><p>{{sectionInfoForm.sectionName}}</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                section_name = $('#id_sectionName').val();
+                $.ajax({
+                    url:'{% url "stock:addSection"%}',
+                    type:'POST',
+                    data:{"section_name":section_name},
+                    success:function(e){
+                        if(e=='1'){
+                            parent.location.reload();
+                            layer.msg("创建成功");
+                        }else{
+                            layer.msg("板块名称重复，请重新输入");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function edit_section(the,id,name){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"编辑板块名称",
+            content:'<div class="text-center" style="margin-top:20px"><p>请编辑板块名称</p><p><input type="text" id="new_name" value="' + name +'"></p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                new_name = $('#new_name').val();
+                $.ajax({
+                    url:'{% url "stock:editSection"%}',
+                    type:'POST',
+                    data:{"id":id,"section_name":new_name},
+                    success:function(e){
+                        if(e=='1'){
+                            parent.location.reload();
+                            layer.msg("编辑成功");
+                        }else{
+                            layer.msg("编辑失败");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function del_section(the,id,name){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"删除板块",
+            content:'<div class="text-center" style="margin-top:20px"><p>是否确定删除' + name +'栏目</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                $.ajax({
+                    url:'{% url "stock:deleteSection"%}',
+                    type:'POST',
+                    data:{"id":id},
+                    success:function(e){
+                        if(e=='1'){
+                            parent.location.reload();
+                            layer.msg("删除成功");
+                        }else{
+                            layer.msg("删除失败");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function add_stock(the,sectionName){
+        var name = $(the).parents("tr").children("td").eq(1).text()
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["500px","400px"],
+            title:"add stock",
+            content:'<div class="text-center" style="margin-top:20px"><p>请输入股票代码</p><p>{{stockSectionForm.stockId}}</p></div><div class="text-center" style="margin-top:20px"><p>请输入股票名称</p><p>{{stockSectionForm.stockName}}</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                stockId = $('#id_stockId').val();
+                stockName = $('#id_stockName').val();
+                $.ajax({
+                    url:'{% url "stock:addStock"%}',
+                    type:'POST',
+                    data:{"sectionName":sectionName,"stockId":stockId,"stockName":stockName},
+                    success:function(e){
+                        if(e=='1'){
+                            parent.location.reload();
+                            layer.msg("添加成功");
+                        }else{
+                            layer.msg("添加失败");
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function merge_section(){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["500px","400px"],
+            title:"merge section",
+            content:'<div class="text-center" style="margin-top:20px"><p>请选择板块</p><p><select id="section1">{{sectionListHtml|safe}}</select></p></div>' + 
+            '<div class="text-center" style="margin-top:20px"><p>请选择板块</p><p><select id="section2">{{sectionListHtml|safe}}</select></p></div>' + 
+            '<div class="text-center" style="margin-top:20px"><p>请输入板块名称</p><p>{{sectionInfoForm.sectionName}}</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                id1 = $('#section1').val();
+                id2 = $('#section2').val();
+                sectionName = $('#id_sectionName').val();
+                if(id1 != id2){
+                    $.ajax({
+                        url:'{% url "stock:mergeSection"%}',
+                        type:'POST',
+                        data:{"id1":id1,"id2":id2,"sectionName":sectionName},
+                        success:function(e){
+                            if(e=='1'){
+                                parent.location.reload();
+                                layer.msg("添加成功");
+                            }else if(e=='2'){
+                                layer.msg("板块名称重复，添加失败");
+                            }else if(e=='3'){
+                                layer.msg("不能选择两个相同的板块");
+                            }else{
+                                layer.msg("添加失败");
+                            }
+                        },
+                    });
+                }else{
+                    layer.msg("不能选择两个相同的板块");
+                }
+
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}{% endblock%}
+
+{% block content%}
+<style>
+
+    .typeahead,
+    .tt-query,
+    .tt-hint {
+      width: 156px;
+      height: 30px;
+      padding: 8px 12px;
+      line-height: 30px;
+      border: 2px solid #ccc;
+      -webkit-border-radius: 8px;
+         -moz-border-radius: 8px;
+              border-radius: 8px;
+      outline: none;
+    }
+    
+    .typeahead {
+      background-color: #fff;
+    }
+    
+    .typeahead:focus {
+      border: 2px solid #0097cf;
+    }
+    
+    .tt-query {
+      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+         -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    }
+    
+    .tt-hint {
+      color: #999
+    }
+    
+    .tt-menu {
+      width: 250px;
+      margin: 12px 0;
+      padding: 8px 0;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      -webkit-border-radius: 8px;
+         -moz-border-radius: 8px;
+              border-radius: 8px;
+      -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+         -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+              box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    }
+    
+    .tt-suggestion {
+      padding: 3px 20px;
+      font-size: 14px;
+      line-height: 24px;
+    }
+    
+    .tt-suggestion:hover {
+      cursor: pointer;
+      color: #fff;
+      background-color: #0097cf;
+    }
+    
+    .tt-suggestion.tt-cursor {
+      color: #fff;
+      background-color: #0097cf;
+    
+    }
+    
+    .tt-suggestion p {
+      margin: 0;
+    }
+    
+    .gist {
+      font-size: 14px;
+    }
+</style>
+<div>
+    <p class="text-right">
+    <button class="btn btn-primary" id="add_stock" onclick="add_stock()">新增</button>
+    </p>
+    <table class="table table-hover">
+        <tr>
+            <td>序号</td>
+            <td>股票代码</td>
+            <td>股票名称</td>
+            <td>显示优先级</td>
+            <td>操作</td>
+        </tr>
+        {% for row in list %}
+        <tr id="{{row.id}}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ row.stockId }}</td>
+            <td>{{ row.stockName }}</td>
+            <td>{{ row.priority }}</td>
+            <td>
+            <a name="edit" href="javascript:" onclick="edit_stock(this,{{row.id}},'{{row.priority}}')" title="修改"> <span class="glyphicon glyphicon-pencil"></span>
+                </a>
+            <a name="delete" href="javascript:" onclick="del_stock(this,{{row.id}},'{{row.stockName}}')" title="删除"><span class="glyphicon glyphicon-trash" style="margin-left:20px"></span></a>
+                </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+<script type="text/javascript" src="{% static 'js/jquery.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/layer.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/typeahead/typeahead.bundle.min.js'%}"></script>
+<script type="text/javascript" src="{% static 'js/handlebars.js'%}"></script>
+
+<script type="text/javascript">
+
+
+    function add_stock(){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["500px","440px"],
+            title:"新增重点监控股票",
+            content:'<form class="form-horizontal" role="form"><div class="form-group"><label class="col-sm-4 control-label">股票代码</label><div class="col-sm-8"><input type="text" name="stockId" class="typeahead" maxlength="300" autocomplete="off" data-provide="typeahead" id="id_stockId" onkeydown="loadStockId()"></div></div><div class="form-group"><label class="col-sm-4 control-label">显示优先级</label><div class="col-sm-8">{{stockWatchListForm.priority}}</div></div></form>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                stockId = $('#id_stockId').val();
+                //stockName = $('#id_stockName').val();
+                priority = $('#id_priority').val();
+                $.ajax({
+                    url:'{% url "stock:addStockWatch"%}',
+                    type:'POST',
+                    data:{"stockId":stockId,"priority":priority},
+                    success:function(e){
+                        if(e=='1'){
+                            
+                            layer.msg("创建成功");
+                            location.reload();
+                        }else{
+                            layer.msg("股票代码重复，请重新输入");
+                            
+                        }
+                        layer.close(index)
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function edit_stock(the,id,priority){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"编辑显示优先级",
+            content:'<div class="text-center" style="margin-top:20px"><p>请编辑显示优先级</p><p><input type="text" id="new_priority" value="' + priority +'"></p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                new_priority = $('#new_priority').val();
+                $.ajax({
+                    url:'{% url "stock:editStockWatch"%}',
+                    type:'POST',
+                    data:{"id":id,"priority":new_priority},
+                    success:function(e){
+                        if(e=='1'){
+                            //parent.location.reload();
+                            layer.msg("编辑成功");
+                            layer.close(index)
+                            location.reload();
+                        }else{
+                            layer.msg("编辑失败");
+                            layer.close(index)
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+    function del_stock(the,id,name){
+        var index = layer.open({
+            type:1,
+            skin:"layui-layer-rim",
+            area:["400px","200px"],
+            title:"删除重点监控股票",
+            content:'<div class="text-center" style="margin-top:20px"><p>是否确定删除' + name +'</p></div>',
+            btn:['确认','取消'],
+            yes:function(index,layero){
+                $.ajax({
+                    url:'{% url "stock:deleteStockWatch"%}',
+                    type:'POST',
+                    data:{"id":id},
+                    success:function(e){
+                        if(e=='1'){
+                            //parent.location.reload();
+                            layer.msg("删除成功");
+                            layer.close(index)
+                            location.reload();
+                        }else{
+                            layer.msg("删除失败");
+                            layer.close(index)
+                        }
+                    },
+                });
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    }
+
+//远程数据源
+var stocks = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('id'),
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    // 在文本框输入字符时才发起请求
+    //remote: '/stock/load_stock_info?q=%QUERY',
+    remote: {
+                url: '/stock/load_stock_id?q=%QUERY',  
+                wildcard: '%QUERY'  
+            }
+});
+
+stocks.initialize();
+
+$('#id_stockId').typeahead({
+    highlight:true
+}, {
+    name: 'stocks',
+    displayKey: 'id',
+    source: stocks.ttAdapter(),
+    /*templates: {
+        empty: [
+            '<div class="empty-message">',
+            '没有找到相关数据',
+            '</div>'
+        ].join('\n'),
+        //suggestion: Handlebars.compile('<p><strong>\{\{id\}\}</strong> - \{\{name\}\}</p>')
+        suggestion:'\{\{id\}\} - \{\{name\}\}'
+    }*/
+    //templates: '\{\{id\}\} - \{\{name\}\}'
+});
+    
+</script>
+{% endblock %}

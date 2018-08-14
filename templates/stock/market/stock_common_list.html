@@ -1,0 +1,283 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style type="text/css">
+    a {
+    color: #333;
+    background: transparent;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+    -webkit-transition: color .2s ease;
+    transition: color .2s ease;
+}
+
+li{
+    list-style: none;
+}
+
+.section-sort-stock {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 139px;
+    flex: 0 0 139px;
+
+    display: flex;
+    margin-bottom:5px;
+}
+
+.section-sort-stock a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: flex-start;
+    -ms-flex-align: flex-start;
+    align-items: flex-start;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 139px;
+    height: 90px;
+    color: #fff;
+}
+
+.section-sort-stock a:hover {
+    text-decoration:none;
+    cursor:default;
+}
+
+.section-sort-desc-stock ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+.section-sort-desc-stock {
+    width: 100%;
+    max-width: 1200px;
+}
+
+.section-sort-bkj-rate-stock {
+    font-size: 12px;
+    margin-left: 5px;
+    margin-bottom: 5px
+}
+
+.stock-hover{
+
+}
+
+#tooltip {
+    position: absolute;
+    border: 1px solid #333;
+    background: #f7f5d1;
+    padding: 1px;
+    color: #333;
+    display: none;
+}
+
+.pastebtn{
+
+}
+</style>
+    
+    <p class="text-right">
+    {% if showValue == 'limitUpCount' %}
+    <!--
+    <input type="text" name="ndays" value="{{ ndays }}">
+    <button class="btn btn-primary" type="submit">查询</button>-->
+    {% endif %}
+    <button class="pastebtn btn btn-primary">复制代码</button>
+    <button class="btn btn-primary" onclick="checkall(true)">全选</button>
+    <button class="btn btn-primary" onclick="checkall(false)">全不选</button>
+    </p>
+
+    <section class="section-sort-desc-stock">
+        <ul>
+            {% for stock in stockList%}
+            <li class="section-sort-stock" >
+                <a href="#" target="_blank" class="text-left "  style="background:rgba(212, 213, 209, 1);" onclick="return false">
+                    <input type="checkbox" name="checkitem" value="{{stock.stockId2}}">
+                    <p></p>
+                    <div class="section-sort-bkj-rate-stock" style="color:red;font-weight: bold" id="stock1rate">
+                    <div style="font-size: 160%;float:left;" class="stock-hover" title="{{stock.stockId2}}">
+                    {{stock.stockName}}</div>
+                    {% if showValue == 'stockCompeteAmout' %}
+                        {{stock.stockZf}}<br>{{stock.stockCompeteAmout| floatformat:2}}
+                    {% elif showValue == 'occupationRate' %}
+                        {{stock.occupationRate| floatformat:2}}
+                    {% elif showValue == 'turnoverRate' %}
+                        {{stock.occupationRate| floatformat:2}}%
+                    {% elif showValue == 'stockAmountRate' %}
+                        {{stock.stockAmountRate| floatformat:2}}
+                    {% elif showValue == 'limitUpCount' %}
+                        {{stock.limitUpCount}}
+                    {% endif %}
+                    </div>
+                    <p class="section-sort-bkj-rate-stock"  style="color:black">总龙头 5版+</p>
+                </a>
+                <a href="#" target="_blank" class="text-left" style="background:rgba(248, 165, 165, 1);color:black" onclick="return false">
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock" style="margin-top: 5px"><span>急拉</span></p>
+                    <p class="section-sort-bkj-rate-stock">
+                        {% for news in stock.newsList %}
+                        <span class="glyphicon glyphicon-asterisk" style="color:{%if news.isbull == '利好' or news.isbull == '超级利好'%}red{% elif news.isbull == '利空' or news.isbull == '超级利空'%}green{%else%}white{%endif%}" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+                {% for section in stock.sectionList%}
+                <li class="section-sort-stock"  style="color:black">
+                    <a href="#" target="_blank"  style="background:rgba(212, 213, 209, 1);" onclick="return false">
+                        <p class="section-sort-bkj-rate-stock" style="margin-top: 5px">
+                            <span style="color:blue;font-weight:bold">{{section.sectionName}} </span>
+                            <span style="color:rgba(246, 32, 233, 1)">{{section.sectionIncreaseRateStr}} </span>
+                            <span style="color:rgba(246, 32, 233, 1)">{{section.increaseCount}}/{{section.decreaseCount}}</span>
+                        </p>
+                        <p class="section-sort-bkj-rate-stock" style="margin-top: 5px">
+                            <span style="color:red">{{section.limitUpCount}}股封</span>
+                            <span style="color:blue"> {{section.badLimitUpCount}}股烂 </span>
+                            <span style="color:red">{{section.threeStraightLimitUp}}股3板+</span>
+                        </p>
+                        <p class="section-sort-bkj-rate-stock">
+                            {% for news in section.newsList %}
+                            <span class="glyphicon glyphicon-asterisk" style="color:{%if news.isbull == '利好' or news.isbull == '超级利好'%}red{% elif news.isbull == '利空' or news.isbull == '超级利空'%}green{%else%}white{%endif%}" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                            {% endfor %}
+                        </p>
+                    </a>
+                    <a href="#" target="_blank" class="text-left" style="background:rgba(248, 165, 165, 1);"  onclick="return false">
+                        <p class="section-sort-bkj-rate-stock" style="margin-top: 5px">
+                            板:<span>{{section.limitUpStocksShow}}
+                            </span>
+                            {% if section.limitUpStocksHidden != ''%}<span class="glyphicon glyphicon-plus" title="{{section.limitUpStocksHidden}}" style="color:"></span>{% endif %}
+                        </p>
+                        <p class="section-sort-bkj-rate-stock" style="margin-top: 5px">
+                            烂:<span>{{section.badLimitUpStocksShow}}
+                            </span>
+                            {% if section.badLimitUpStocksHidden != ''%}<span class="glyphicon glyphicon-plus" title="{{section.badLimitUpStocksHidden}}"></span>{% endif %}
+                        </p>
+                        <p class="section-sort-bkj-rate-stock" style="margin-top: 5px">
+                            动:<span>{{section.specialStockShow}}
+                            </span>
+                             {% if section.specialStockHidden != ''%}<span class="glyphicon glyphicon-plus" title="{{section.specialStockHidden}}"></span>{% endif %}
+                        </p>
+                    </a>
+                </li>
+                {%endfor%}
+                {% for emptyBlock in stock.emptyBlock%}
+                <li class="section-sort-stock">
+                    <a href="#" style="background:white;" onclick="return false">
+                    </a>
+                    <a href="#" style="background:white;" onclick="return false">
+                    </a>
+                </li>
+                {% endfor%}
+            {% empty %}
+            <div class="alert alert-info" style="width:100%">查询结果为空</div>
+            {%endfor%}
+        </ul>
+
+    </section>
+
+<script type="text/javascript" src="{% static "js/clipboard.min.js"%}"></script>
+<script type="text/javascript" src="{% static "js/layer.js"%}"></script>
+<script type="text/javascript">
+
+var clipboard = new ClipboardJS('.pastebtn', {
+    text: function() {
+        stockIdStr = ''
+        $('[name=checkitem]:checkbox:checked').each(function(){
+            if(stockIdStr == ''){
+                stockIdStr = $(this).val();
+            }else{
+                stockIdStr = stockIdStr + ',' + $(this).val()
+            }
+
+        });
+        return stockIdStr;
+    }
+});
+
+clipboard.on('success', function(e) {
+
+});
+
+clipboard.on('error', function(e) {
+    alert(e);
+});
+
+function checkall(checked){
+    $('[name=checkitem]:checkbox').prop('checked',checked);
+}
+layerIndex = -1;
+$(function () {
+    var x = 10;
+    var y = 20;
+    $('div.stock-hover').bind({
+        mouseenter:function(e){
+            if(layerIndex != -1){
+                return;
+            }
+            this.myTitle = this.title;
+            var market = this.myTitle.substr(0,2);
+            if(market == 'SH'){
+                market = 'SS';
+            }
+            stockId = this.myTitle.substr(2) + '.' + market;
+            this.title = "";
+            layerIndex = layer.open({
+              type: 2,
+              title: '',
+              shadeClose: true,
+              closeBtn: 1,
+              shade: 0,
+              area:["878px","475px"],
+              offset:[e.pageY + 5 + "px",e.pageX + 5 + "px"],
+              content: 'https://wallstreetcn.com/markets/widget/ashares/' + stockId,
+              end:function(){
+                layerIndex = -1;
+              }
+            });
+        },
+        mouseleave:function(){
+            this.title = this.myTitle
+            //layer.close(layerIndex)
+        }
+    });
+
+    $("span.glyphicon").mouseover(function (e) {
+        this.myTitle = this.title;
+        this.title = "";
+        var tooltip = "<div id='tooltip'>" + this.myTitle + "<\/div>"; //创建 div 元素 文字提示
+        $("body").append(tooltip);  //把它追加到文档中
+        $("#tooltip").css({
+            "top": (e.pageY + y) + "px",
+            "left": (e.pageX + x) + "px"
+        }).show("fast");      //设置x坐标和y坐标，并且显示
+    }).mouseout(function () {
+        this.title = this.myTitle;
+        $("#tooltip").remove();   //移除
+    }).mousemove(function (e) {
+        $("#tooltip").css({
+            "top": (e.pageY + y) + "px",
+            "left": (e.pageX + x) + "px"
+        });
+    });
+})
+</script>
+{% endblock %}

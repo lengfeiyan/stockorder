@@ -1,0 +1,405 @@
+{% extends "stock/base.html "%}
+
+{% load staticfiles %}
+
+{% block title %}JYU{% endblock%}
+
+{% block content%}
+<style type="text/css">
+
+.section-sort {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    margin-top: 32px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.section-sort-desc ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-left: 10px
+}
+
+.section-sort-desc {
+    width: 50%;
+    max-width: 600px;
+}
+a {
+    color: #333;
+    background: transparent;
+    text-decoration: none;
+    outline: none;
+    cursor: default;
+    -webkit-transition: color .2s ease;
+    transition: color .2s ease;
+}
+
+a:link { text-decoration:none;} 
+a:visited {text-decoration:none;}
+a:hover {text-decoration:none;}  
+
+li{
+    list-style: none;
+}
+
+ul{
+    margin-top: 10px
+}
+
+.section-sort-stock {
+    -webkit-transition: .5s;
+    transition: .5s;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 96px;
+    flex: 0 0 96px;
+}
+
+.section-sort-stock a {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: flex-start;
+    -ms-flex-align: flex-start;
+    align-items: flex-start;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 96px;
+    height: 60px;
+}
+
+#tooltip {
+            position: absolute;
+            border: 1px solid #333;
+            background: #f7f5d1;
+            padding: 1px;
+            color: #333;
+            display: none;
+        }
+.stockname{
+    font-size: 100%
+}
+</style>
+<section class="section-sort">
+    <section class="section-sort-desc">
+        {% if stockNewsBull|length > 0 %}
+        {% for data in stockNewsBull %}
+        <div style="font-size:200%" class="row">
+            <div class="col-md-6">
+                <span class="label label-danger">个股利好</span>
+                <span class="label label-warning" style="margin-left:5px">
+                    {% if forloop.counter == 1 %} ·今日
+                    {% elif forloop.counter == 2 %} ·昨日
+                    {% elif forloop.counter == 3 %} ·前日
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="label label-warning" style="margin-right:5px" onclick="exportnews('stock',{{forloop.counter}},'利好')">
+                    导出
+                </span>
+            </div>
+        </div>
+        <ul>
+        {% for key,value in data.items %}
+            <li class="section-sort-stock">
+                <a href="#" class="text-left" onclick="return false;">
+                    <p style="margin-bottom:0" class="stockname" title="{{key}}">{{key}}</p>
+                    <p class="text-left">
+                        {% for news in value %}
+                        {%if news.isbull == '利好' or news.isbull == '超级利好'%}
+                        <span class="glyphicon glyphicon-asterisk" style="color:red" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {%endif%}
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+        {%endif%}
+        {% if stockNewsBear|length > 0 %}
+         {% for data in stockNewsBear %}
+        <div style="font-size:200%" class="row">
+            <div class="col-md-6">
+                <span class="label label-danger">个股利空</span>
+                <span class="label label-warning" style="margin-left:5px">
+                    {% if forloop.counter == 1 %} ·今日
+                    {% elif forloop.counter == 2 %} ·昨日
+                    {% elif forloop.counter == 3 %} ·前日
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="label label-warning" style="margin-right:5px" onclick="exportnews('stock',{{forloop.counter}},'利空')">
+                    导出
+                </span>
+            </div>
+        </div>
+        <ul>
+        {% for key,value in data.items %}
+            <li class="section-sort-stock">
+                <a href="#" class="text-left" onclick="return false;">
+                    <p style="margin-bottom:0" class="stockname" title="{{key}}">{{key}}</p>
+                    <p class="text-left">
+                        {% for news in value %}
+                        {%if news.isbull == '利空' or news.isbull == '超级利空'%}
+                        <span class="glyphicon glyphicon-asterisk" style="color:green" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {%endif%}
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+        {%endif%}
+        {% if stockNews|length > 0 %}
+         {% for data in stockNews %}
+        <div style="font-size:200%" class="row">
+            <div class="col-md-6">
+                <span class="label label-danger">个股中性</span>
+                <span class="label label-warning" style="margin-left:5px">
+                    {% if forloop.counter == 1 %} ·今日
+                    {% elif forloop.counter == 2 %} ·昨日
+                    {% elif forloop.counter == 3 %} ·前日
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="label label-warning" style="margin-right:5px" onclick="exportnews('stock',{{forloop.counter}},'')">
+                    导出
+                </span>
+            </div>
+        </div>
+        <ul>
+        {% for key,value in data.items %}
+            <li class="section-sort-stock">
+                <a href="#" class="text-left" onclick="return false;">
+                    <p style="margin-bottom:0" class="stockname" title="{{key}}">{{key}}</p>
+                    <p class="text-left">
+                        {% for news in value %}
+                        {%if news.isbull == ''%}
+                        <span class="glyphicon glyphicon-asterisk" style="color:grey" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {%endif%}
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+        {%endif%}
+    </section>
+
+    <section class="section-sort-desc">   
+        {% if sectionNewsBull|length > 0 %}     
+        {% for data in sectionNewsBull %}
+        <div style="font-size:200%" class="row">
+            <div class="col-md-6">
+                <span class="label label-danger">板块利好</span>
+                <span class="label label-warning" style="margin-left:5px">
+                    {% if forloop.counter == 1 %} ·今日
+                    {% elif forloop.counter == 2 %} ·昨日
+                    {% elif forloop.counter == 3 %} ·前日
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="label label-warning" style="margin-right:5px" onclick="exportnews('section',{{forloop.counter}},'利好')">
+                    导出
+                </span>
+            </div>
+        </div>
+        <ul>
+        {% for key,value in data.items %}
+            <li class="section-sort-stock">
+                <a href="#" target="_blank" class="text-left" onclick="return false;">
+                    <p style="margin-bottom:0" class="stockname" title="{{key}}">{{key}}</p>
+                    <p class="text-left">
+                        {% for news in value %}
+                        {%if news.isbull == '利好' or news.isbull == '超级利好'%}
+                        <span class="glyphicon glyphicon-asterisk" style="color:red" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {%endif%}
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+        {%endif%}
+        {% if sectionNewsBear|length > 0 %}
+        {% for data in sectionNewsBear %}
+        <div style="font-size:200%" class="row">
+            <div class="col-md-6">
+                <span class="label label-danger">板块利空</span>
+                <span class="label label-warning" style="margin-left:5px">
+                    {% if forloop.counter == 1 %} ·今日
+                    {% elif forloop.counter == 2 %} ·昨日
+                    {% elif forloop.counter == 3 %} ·前日
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="label label-warning" style="margin-right:5px" onclick="exportnews('section',{{forloop.counter}},'利空')">
+                    导出
+                </span>
+            </div>
+        </div>
+        <ul>
+        {% for key,value in data.items %}
+            <li class="section-sort-stock">
+                <a href="#" target="_blank" class="text-left" onclick="return false;">
+                    <p style="margin-bottom:0" class="stockname" title="{{key}}">{{key}}</p>
+                    <p class="text-left">
+                        {% for news in value %}
+                        {%if news.isbull == '利空' or news.isbull == '超级利空'%}
+                        <span class="glyphicon glyphicon-asterisk" style="color:green" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {%endif%}
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+        {%endif%}
+        {% if sectionNews|length > 0 %}
+        {% for data in sectionNews %}
+        <div style="font-size:200%" class="row">
+            <div class="col-md-6">
+                <span class="label label-danger">板块中性</span>
+                <span class="label label-warning" style="margin-left:5px">
+                    {% if forloop.counter == 1 %} ·今日
+                    {% elif forloop.counter == 2 %} ·昨日
+                    {% elif forloop.counter == 3 %} ·前日
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="label label-warning" style="margin-right:5px" onclick="exportnews('section',{{forloop.counter}},'')">
+                    导出
+                </span>
+            </div>
+        </div>
+        <ul>
+        {% for key,value in data.items %}
+            <li class="section-sort-stock">
+                <a href="#" target="_blank" class="text-left" onclick="return false;">
+                    <p style="margin-bottom:0" class="stockname" title="{{key}}">{{key}}</p>
+                    <p class="text-left">
+                        {% for news in value %}
+                        {%if news.isbull == ''%}
+                        <span class="glyphicon glyphicon-asterisk" style="color:grey" title="{{news.datetime}}:{{news.title}} {{news.isbull}}<br>{{new.content}}"></span>
+                        {%endif%}
+                        {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+        {% endfor %}
+        {%endif%}
+    </section>
+</section>
+<form type="submit" action="{% url 'stock:exportNews'%}" method="POST" name="exportForm" id="exportForm">
+    <input type="hidden" name="type" id="type">
+    <input type="hidden" name="dayseq" id="dayseq">
+    <input type="hidden" name="isbull" id="isbull">
+</form>
+<script type="text/javascript" src="{% static "js/jquery.js"%}"></script>
+<script type="text/javascript">
+setInterval(function(){
+    //location.reload()
+},60000);
+
+function exportnews(type, dayseq, isbull){
+    var form = $("#exportForm");
+    $("#type").val(type);
+    $("#dayseq").val(dayseq);
+    $("#isbull").val(isbull);
+    form.submit();
+}
+layerIndex = -1;
+$(function () {
+    x = 10
+    y = 10
+    $("span.glyphicon").mouseover(function (e) {
+        this.myTitle = this.title;
+        this.title = "";
+        var tooltip = "<div id='tooltip'>" + this.myTitle + "<\/div>"; //创建 div 元素 文字提示
+        $("body").append(tooltip);  //把它追加到文档中
+        $("#tooltip").css({
+            "top": (e.pageY + y) + "px",
+            "left": (e.pageX + x) + "px"
+        }).show("fast");      //设置x坐标和y坐标，并且显示
+    }).mouseout(function () {
+        this.title = this.myTitle;
+        $("#tooltip").remove();   //移除
+    }).mousemove(function (e) {
+        $("#tooltip").css({
+            "top": (e.pageY + y) + "px",
+            "left": (e.pageX + x) + "px"
+        });
+    });
+
+    $('p.stockname').bind({
+        mouseenter:function(e){
+            if(layerIndex != -1){
+                return;
+            }
+            this.myTitle = this.title;
+            this.title = "";
+            $.ajax({
+                url:"{% url 'stock:getStockId'%}",
+                type:"POST",
+                data:{'stockName':'{{this.myTitle}}'},
+                success:function(returnData){
+                    if(returnData != ''){
+                        var market = returnData.substr(0,2);
+                        if(market == 'SH'){
+                            market = 'SS';
+                        }
+                        stockId = returnData.substr(2) + '.' + market;
+                        layerIndex = layer.open({
+                            type: 2,
+                            title: '',
+                            shadeClose: true,
+                            closeBtn: 1,
+                            shade: 0,
+                            area:["878px","475px"],
+                            offset:[e.pageY + 5 + "px",e.pageX + 5 + "px"],
+                            content: 'https://wallstreetcn.com/markets/widget/ashares/' + stockId,
+                            end:function(){
+                                layerIndex = -1;
+                            }
+                        });
+                    }
+                }
+            });   
+        },
+        mouseleave:function(e){
+            this.title = this.myTitle
+            //layer.close(layerIndex)
+        }
+    });
+})
+</script>
+
+{% endblock %}
