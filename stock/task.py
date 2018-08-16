@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from celery import shared_task
 import datetime
 import threading
-from .models import OrderRule, StockFactor, OrderLog
+from .models import OrderRule, StockFactor, OrderLog, StockAuction, StockKLineMode
 import sys
 from .apps import StockConfig
 from stocklog.utils import insertTaskLog
@@ -74,7 +74,7 @@ def autoOrder():
         return
     date = now.strftime("%Y-%m-%d")
 
-    orderRuleList = OrderRule.objects.using('stockdb').filter(isvalid="1", expiretime__gt=date + ' 23:59:59') 
+    orderRuleList = OrderRule.objects.using('stockdb').filter(isvalid="1", expiretime__gt=date + ' 23:59:59')
     orderLogNewList = []
     url = "http://47.100.100.244:3000/stock/publish?message="
     message = ""
@@ -87,23 +87,7 @@ def autoOrder():
                 print('already order')
                 continue
             #判断因子是否达标
-            ruleFactors = orderRule.factors.split(',')
-            stockFactor = StockFactor.objects.using('stockdb').filter(date=date, stockId=orderRule.stockId)
-            print(ruleFactors)
-            isMatch = True
-            if stockFactor:
-                currentFactors = stockFactor[0].factor.split(' ')
-                print(currentFactors)
-                #循环设定的因子，如果有一个不符合就设置isMatch为False，符合则循环下一个因子
-                for factor in ruleFactors:
-                    if factor in currentFactors:
-                        continue
-                    else:
-                        isMatch = False
-                        break
-            else:
-                #因子表里查询不到该股票，肯定不达标
-                continue
+            isMatch = matchRule(orderRule, date)
             print(isMatch)
             if not isMatch:
                 continue
@@ -117,7 +101,7 @@ def autoOrder():
                     print(returnData[2].decode('gbk'))
                     continue
             #拼装消息字符串
-            stockMessage = "b," + orderRule.stockId + ','+ str(orderPrice) + ',' + str(orderRule.orderQuantity)
+            stockMessage = "b," + orderRule.stockId[2:] + ','+ str(orderPrice) + ',' + str(orderRule.orderQuantity)
             if message == '':
                 message = stockMessage
             else:
@@ -146,3 +130,23 @@ def autoOrder():
             OrderLog.objects.bulk_create(orderLogNewList)
     insertTaskLog(now.strftime("%Y-%m-%d %H:%M:%S.%f"), datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), 'autoOrderRule', 'success', '', 0)
     #print(datetime.datetime.now())
+
+def matchRule(orderRule, date):
+    ruleFactors = orderRule.factors.split(',')
+    isMatch = True
+    for factor in ruleFactors:
+        print(factor)
+        if factor == '竞价达标':
+            auction = StockAuction.objects.using('stockdb').filter(stockId=orderRule.stockId, date=date)
+            if not auction:
+                print('match failed')
+                isMatch = False
+                break
+        else:
+            lineMode = StockKLineMode.objects.using('stockdb').filter(stockId=orderRule.stockId, 
+                                                datetime__contains=date, datetime_gt=orderRule.createtime)
+            if not lineMode:
+                print('match failed')
+                isMatch = False
+                break
+    return isMatch
