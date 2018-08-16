@@ -65,13 +65,13 @@ def autoOrderZT():
 def autoOrder():
     now = datetime.datetime.now()
     hour = int(now.strftime("%H%M"))
-    if hour > 1500 or hour < 930:
-        print('autoOrder not running time :' + str(hour))
-        return
-    dayOfWeek = int(now.strftime("%w"))
-    if dayOfWeek == 0 or dayOfWeek == 6:
-        print('autoOrder not running day :' + str(dayOfWeek))
-        return
+    #if hour > 1500 or hour < 930:
+    #    print('autoOrder not running time :' + str(hour))
+    #    return
+    #dayOfWeek = int(now.strftime("%w"))
+    #if dayOfWeek == 0 or dayOfWeek == 6:
+    #    print('autoOrder not running day :' + str(dayOfWeek))
+    #    return
     date = now.strftime("%Y-%m-%d")
 
     orderRuleList = OrderRule.objects.using('stockdb').filter(isvalid="1", expiretime__gt=date + ' 23:59:59')
@@ -144,7 +144,7 @@ def matchRule(orderRule, date):
                 break
         else:
             lineMode = StockKLineMode.objects.using('stockdb').filter(stockId=orderRule.stockId, 
-                                                datetime__contains=date, datetime_gt=orderRule.createtime)
+                                                datetime__contains=date, datetime__gt=orderRule.createtime)
             if not lineMode:
                 print('match failed')
                 isMatch = False
