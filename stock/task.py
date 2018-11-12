@@ -156,22 +156,48 @@ def matchRule(orderRule, date):
 def autoOrderWarningStock():
     currentDate = StockTradeDay.objects.using('stockdb').all().order_by('-date')[0]
     currentDatetime = WarningStock.objects.using('stockdb').filter(datetime__contains=currentDate).order_by('-datetime')[0].datetime
-    allWarningStocks = WarningStock.objects.using('stockdb').filter(datetime=currentDatetime)
     orderLogNewList = []
-    message = ''
-    for stock in allWarningStocks:
-        #拼装消息字符串
-        orderQuantity = 100
-        stockMessage = "b," + stock.stockId[2:] + ','+ str(stock.close) + ',' + str(orderQuantity)
-        if message == '':
-            message = stockMessage
-        else:
-            message = message + ";" + stockMessage
-        #初始化下单日志对象
-        orderLogNew = OrderLog(datetime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), 
-                            stockId=stock.stockId, stockName=stock.stockName, orderPrice=stock.close, 
-                            orderQuantity=orderQuantity, request=stockMessage, response='')
-        orderLogNewList.append(orderLogNew)
+    
+    orderRuleList = OrderRule.objects.using('stockdb').filter(isvalid="1", expiretime__lt=currentDate + ' 23:59:59')
+    orderLogNewList = []
+    url = "http://47.100.100.244:3000/stock/publish?message="
+    message = ""
+    for orderRule in orderRuleList:
+        try:
+            #判断当天该股票是否已经自动下单
+            orderLog = OrderLog.objects.filter(datetime__contains=date, stockId=orderRule.stockId)
+            print(orderRule.stockId)
+            if orderLog:
+                print('already order')
+                continue
+            #判断因子是否达标
+            isMatch = matchRule(orderRule, currentDatetime)
+            print(isMatch)
+            if not isMatch:
+                continue
+            #获取实时价格，获取失败时不发送信息
+            orderPrice = orderRule.orderPrice
+            if orderPrice == 0.00:
+                returnData = TSLPy3.RemoteCallFunc("stock_realtime_data", [orderRule.stockId], {})
+                if returnData[0] == 0:
+                    orderPrice = returnData[1][b'close']
+                else:
+                    print(returnData[2].decode('gbk'))
+                    continue
+            #拼装消息字符串
+            stockMessage = "b," + orderRule.stockId[2:] + ','+ str(orderPrice) + ',' + str(orderRule.orderQuantity)
+            if message == '':
+                message = stockMessage
+            else:
+                message = message + ";" + stockMessage
+            #初始化下单日志对象
+            orderLogNew = OrderLog(datetime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), 
+                                stockId=orderRule.stockId, stockName=orderRule.stockName, orderPrice=orderPrice, 
+                                orderQuantity=orderRule.orderQuantity, request=stockMessage, response=str(orderRule.id))
+            orderLogNewList.append(orderLogNew)
+        except KeyError:
+            break
+    print(url + message)
     #消息不为空时发送消息
     if message != '':
         req = Request(url + message)
@@ -180,8 +206,23 @@ def autoOrderWarningStock():
         if responseData.find("发布消息成功") != -1:
             #发送成功将规则设置为失效，并更新日志的返回信息字段
             for log in orderLogNewList:
+                rule = OrderRule.objects.using('stockdb').get(id=int(log.response))
+                rule.isvalid = '0'
+                rule.ordertime = log.datetime
+                rule.save()
                 log.response = responseData
             OrderLog.objects.bulk_create(orderLogNewList)
+    insertTaskLog(now.strftime("%Y-%m-%d %H:%M:%S.%f"), datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"), 'autoOrderRule', 'success', '', 0)
 
-def macthWarningStock(score, bull, warningTime)
-    pass
+
+def macthWarningStock(orderRule, currentDatetime):
+    warningStock = WarningStock.objects.using('stockdb').filter(datetime=currentDatetime, stockId=orderRule.stockId, factorScore__gt=orderRule.factorScore)
+    if warningStock:
+        factors = orderRule.factors.split('_')
+        for stock in warningStock:
+            for factor in factors:
+                if factor not in warningStock.factorStr:
+                    return False
+            return True
+    else:
+        return False
